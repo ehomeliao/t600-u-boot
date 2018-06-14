@@ -44,7 +44,11 @@ void fsl_ddr_set_memctl_regs(const fsl_ddr_cfg_regs_t *regs,
 #ifdef CONFIG_SYS_FSL_ERRATUM_DDR_A003
 	u32 save1, save2;
 #endif
-
+/* stanley_liu add errata A009942 */
+#ifdef CONFIG_SYS_FSL_ERRATUM_A009942
+	ulong ddr_freq;
+	u32 tmp;
+#endif
 	switch (ctrl_num) {
 	case 0:
 		ddr = (void *)CONFIG_SYS_FSL_DDR_ADDR;
@@ -188,6 +192,22 @@ void fsl_ddr_set_memctl_regs(const fsl_ddr_cfg_regs_t *regs,
 	out_be32(&ddr->debug[12], 0x00000015);
 	out_be32(&ddr->debug[21], 0x24000000);
 #endif /* CONFIG_SYS_FSL_ERRATUM_DDR_A003474 */
+
+/* stanley_liu add errata A009942 */
+#ifdef CONFIG_SYS_FSL_ERRATUM_A009942
+	ddr_freq = get_ddr_freq(ctrl_num) / 1000000;
+	tmp = in_be32(&ddr->debug[28]);
+	if (ddr_freq <= 1333)
+		out_be32(&ddr->debug[28], tmp | 0x0080006a);
+	else if (ddr_freq <= 1600){
+		out_be32(&ddr->debug[28], tmp | 0x0070004D);
+		printf("ddr->debug[28]=%x\n",ddr->debug[28]);
+	}
+	else if (ddr_freq <= 1867)
+		out_be32(&ddr->debug[28], tmp | 0x00700076);
+	else if (ddr_freq <= 2133)
+		out_be32(&ddr->debug[28], tmp | 0x0060007b);
+#endif
 
 	/*
 	 * For RDIMMs, JEDEC spec requires clocks to be stable before reset is
