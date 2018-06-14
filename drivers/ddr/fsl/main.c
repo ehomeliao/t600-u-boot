@@ -90,8 +90,17 @@ static void __get_spd(generic_spd_eeprom_t *spd, u8 i2c_address)
 #ifdef CONFIG_SYS_FSL_DDR4
 	uint8_t dummy = 0;
 #endif
+	uint8_t ch;
 
 	i2c_set_bus_num(CONFIG_SYS_SPD_BUS_NUM);
+
+	/* stanley_liu: open I2C MUX CH2/CH3 */
+	ch = 0xc;
+	ret = i2c_write(0x72, 0, 1, &ch, 1);
+	if (ret) {
+		printf("PCA: failed to select proper channel\n");
+	}
+	printf("__get_spd: try to read spd from address 0x%x\n", i2c_address);
 
 #ifdef CONFIG_SYS_FSL_DDR4
 	/*
@@ -129,6 +138,10 @@ static void __get_spd(generic_spd_eeprom_t *spd, u8 i2c_address)
 		}
 		memset(spd, 0, sizeof(generic_spd_eeprom_t));
 	}
+
+	/* stanley_liu: close I2C MUX*/
+	ch = 0;
+	ret = i2c_write(0x72, 0, 1, &ch, 1);
 }
 
 __attribute__((weak, alias("__get_spd")))

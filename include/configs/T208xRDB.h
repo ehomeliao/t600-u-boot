@@ -223,10 +223,10 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_DDR_SPD
 #define CONFIG_SYS_FSL_DDR3
 #undef CONFIG_FSL_DDR_INTERACTIVE
-#define CONFIG_SYS_SPD_BUS_NUM	0
+#define CONFIG_SYS_SPD_BUS_NUM	1	/* stanley_liu: change from bus0 to bus1 */
 #define CONFIG_SYS_SDRAM_SIZE	2048	/* for fixed parameter use */
-#define SPD_EEPROM_ADDRESS1	0x51
-#define SPD_EEPROM_ADDRESS2	0x52
+#define SPD_EEPROM_ADDRESS1	0x52	/* stanley_liu: for chip select 0/1 */
+#define SPD_EEPROM_ADDRESS2	0x53	/* stanley_liu: for chip select 2/3 */
 #define SPD_EEPROM_ADDRESS	SPD_EEPROM_ADDRESS1
 #define CTRL_INTLV_PREFERED	cacheline
 
