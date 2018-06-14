@@ -100,7 +100,6 @@ static void __get_spd(generic_spd_eeprom_t *spd, u8 i2c_address)
 	if (ret) {
 		printf("PCA: failed to select proper channel\n");
 	}
-	printf("__get_spd: try to read spd from address 0x%x\n", i2c_address);
 
 #ifdef CONFIG_SYS_FSL_DDR4
 	/*
