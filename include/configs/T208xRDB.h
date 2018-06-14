@@ -185,7 +185,7 @@ unsigned long get_board_sys_clk(void);
 unsigned long get_board_ddr_clk(void);
 #endif
 
-#define CONFIG_SYS_CLK_FREQ	66660000
+#define CONFIG_SYS_CLK_FREQ	100000000 /* stanley_liu correct system clock setting */
 #define CONFIG_DDR_CLK_FREQ	133330000
 
 /*
