@@ -506,8 +506,9 @@ unsigned long get_board_ddr_clk(void);
  */
 #define CONFIG_PCI		/* Enable PCI/PCIE */
 #define CONFIG_PCIE1		/* PCIE controler 1 */
-#define CONFIG_PCIE2		/* PCIE controler 2 */
-#define CONFIG_PCIE3		/* PCIE controler 3 */
+/* stanley_liu: disable PCIE2 PCIE3 */
+/*#define CONFIG_PCIE2 */		/* PCIE controler 2 */
+/*#define CONFIG_PCIE3 */		/* PCIE controler 3 */
 #define CONFIG_PCIE4		/* PCIE controler 4 */
 #define CONFIG_FSL_PCI_INIT	/* Use common FSL init code */
 #define CONFIG_SYS_PCI_64BIT	/* enable 64-bit PCI resources */
