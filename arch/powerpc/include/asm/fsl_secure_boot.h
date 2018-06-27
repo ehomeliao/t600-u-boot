@@ -37,7 +37,8 @@
 	defined(CONFIG_T1040QDS) || \
 	defined(CONFIG_T104xRDB) || \
 	defined(CONFIG_PPC_T1024) || \
-	defined(CONFIG_PPC_T1023)
+	defined(CONFIG_PPC_T1023) || \
+	defined(CONFIG_T600)
 #define CONFIG_SYS_CPC_REINIT_F
 #define CONFIG_KEY_REVOCATION
 #undef CONFIG_SYS_INIT_L3_ADDR

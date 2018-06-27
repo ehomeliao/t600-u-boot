@@ -1,0 +1,474 @@
+/*
+ * Copyright 2009-2013 Freescale Semiconductor, Inc.
+ *
+ * SPDX-License-Identifier:     GPL-2.0+
+ */
+
+#include <common.h>
+#include <command.h>
+#include <i2c.h>
+#include <netdev.h>
+#include <linux/compiler.h>
+#include <asm/mmu.h>
+#include <asm/processor.h>
+#include <asm/immap_85xx.h>
+#include <asm/fsl_law.h>
+#include <asm/fsl_serdes.h>
+#include <asm/fsl_portals.h>
+#include <asm/fsl_liodn.h>
+#include <fm_eth.h>
+#include "t600.h"
+#include "cpld.h"
+#ifdef CONFIG_CDEC_CPLD
+#include "cdec_cpld.h"
+#endif
+
+DECLARE_GLOBAL_DATA_PTR;
+
+int checkboard(void)
+{
+	struct cpu_type *cpu = gd->arch.cpu;
+	static const char *freq[3] = {"100.00MHZ", "125.00MHz", "156.25MHZ"};
+
+	printf("Board: T600, ");
+	printf("Board rev: 0x%02x CPLD ver: 0x%02x, boot from ",
+	       CPLD_READ(hw_ver), CPLD_READ(sw_ver));
+
+#ifdef CONFIG_SDCARD
+	puts("SD/MMC\n");
+#elif CONFIG_SPIFLASH
+	puts("SPI\n");
+#else
+	u8 reg;
+
+	reg = CPLD_READ(flash_csr);
+
+	if (reg & CPLD_BOOT_SEL) {
+		puts("NAND\n");
+	} else {
+		reg = ((reg & CPLD_LBMAP_MASK) >> CPLD_LBMAP_SHIFT);
+		printf("NOR vBank%d\n", reg);
+	}
+#endif
+
+	puts("SERDES Reference Clocks:\n");
+	printf("SD1_CLK1=%s, SD1_CLK2=%s\n", freq[2], freq[0]);
+	printf("SD2_CLK1=%s, SD2_CLK2=%s\n", freq[0], freq[0]);
+
+	return 0;
+}
+
+#ifdef CONFIG_CDEC_CPLD
+static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_config_index, unsigned int fpga_config_mode, int fstype, unsigned int fpga_n)
+{
+	unsigned int fpga_config_size=0;
+	unsigned int temp=0;
+	unsigned long addr = FPGA_CONFIG_RAM_START_ADR;
+	char szBuffer[256];
+	char* dirname = szBuffer;
+#if 0
+	loff_t bytes = 0;
+	loff_t pos = 0;
+	loff_t len_read;
+#else
+	int bytes = 0;
+	int pos = 0;
+	int len_read;
+#endif
+	int ret;
+#if 0
+	unsigned int bank = 0;
+	unsigned int act_bank = 0;
+
+	/* Kernel Start Bank infomation                 */
+	/* bank  = 0 SATA side0 kernel(Defunt)          */
+	/*         1 SATA side1 kernel                  */
+	/*         2 In boot flash'kernel(Debug)        */
+	/*         3 Network (Debug)                    */
+	/*         4 USB (Degug)                        */
+	bank = getenv_ulong("bank", 16, 0x0);
+	
+	switch(bank) {
+	case 0:								/* SATA 0面起動 */
+		/* Open SATA 0:1 device */
+		if (fs_set_blk_dev("sata","0:1", fstype)){
+			puts("Error Access SATA 0:1 \n");
+			return RET_ERROR;
+		}
+		break;
+	case 1:								/* SATA 1面起動 */
+		/* Open SATA 0:2 device */
+		if (fs_set_blk_dev("sata","0:2", fstype)){
+			puts("Error Access SATA 0:2 \n");
+			return RET_ERROR;
+		}
+		break;
+	default:
+	/*case 2:*/								/* BootFlash 起動 */
+	/*case 3:*/								/* Network 起動   */
+	/*case 4:*/								/* USB    起動    */
+		/* FPGA Config Partition bank env get */
+		/* act_bank = 0 use partition 0 (defult) */
+		/*            1 use partition 1 (defult) */
+		if ( -1 == getenv_yesno("act_bank")) {
+			fpconf_debug("# Nothing act_bank env \n");
+			setenv("act_bank", "0");
+		}
+		
+		act_bank = getenv_ulong("act_bank", 16, 0x0);
+		
+		
+		if (1 == act_bank) {
+			/* Open SATA 0:2 device */
+			if (fs_set_blk_dev("sata","0:2", fstype)){
+				puts("Error Access SATA 0:2 \n");
+				return RET_ERROR;
+			}
+		} else {
+			/* Open SATA 0:1 device */
+			if (fs_set_blk_dev("sata","0:1", fstype)){
+				puts("Error Access SATA 0:1 \n");
+				return RET_ERROR;
+			}
+		}
+		
+		break;
+	}
+	
+	
+	if (1 == fpga_n) {
+		/* FPGA Config File dirctory env get                */
+		strcpy (dirname, getenv("fpgacnfdir"));
+	}
+	
+	if (2 == fpga_n) {
+		/* FPGA Config File dirctory env get                */
+		strcpy (dirname, getenv("fpgacnfdir2"));
+	}
+#endif
+
+	if (fs_set_blk_dev("sata","1", fstype)){
+		puts("Error Access SATA 1 \n");
+		return RET_ERROR;
+	}
+
+	strcpy(dirname, "T600/");
+	strcat(dirname, filename);
+
+	/* FPGA Config File(FP01.bin) Read From SATA 0 to RAM 20000000 */
+	len_read = fs_read(dirname, addr, pos, bytes);
+
+	if (len_read <= 0) {
+#if 0
+		if((0==bank) ||(1==bank)) {
+			printf("Error Read File(%s) From SATA 0:%01d \n",dirname,bank+1);
+		} else {
+			printf("Error Read File(%s) From SATA 0:%01d \n",dirname,act_bank+1);
+		}
+#else
+		printf("Error Read File(%s) From SATA 1\n",dirname);
+#endif
+		return RET_RERY;
+	}
+
+	/* Chack size */
+	temp = (len_read%2);
+	fpga_config_size = (temp + len_read);
+
+	/* WATCHDOG RESET */	
+//	CPLD_WATCHDOG_RESET();	
+
+	ret=fpga_config_main(fpga_config_index, fpga_config_mode, fpga_config_size);
+
+//	fpconf_debug("# FPGA CPLD Configuration Infomation is %x\n",ret);
+
+	/* memset((void*)FPGA_CONFIG_RAM_START_ADR, 0, fpga_config_size); */
+
+	return ret;
+}
+
+static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
+{
+	/* FPGA Config From SATA */
+	unsigned int fpga_config_cwkad=0;
+	
+	unsigned int fpga_config_mode=0;
+	unsigned int rtn=0;
+	int fstype;
+	
+	char fnameBuffer[10];
+	char* fname = fnameBuffer;
+	
+	
+	
+//	fstype = 2;	/* 2 is FS_TYPE_EXT */
+	fstype = 1; /* 1 is FS_TYPE_FAT */
+	
+	/* FPGA Config CPLD WA env get                    */
+	/* fpcfcpld_wkad1 = 0 Not use work around(defult) */
+	/*                  1 use work aroud              */
+//	fpga_config_cwkad = getenv_ulong("fpcfcpld_wkad1", 16, 0x0);
+	strcpy (fname, "fp01.bin");
+
+#if 0	
+	if (1 == fpga_n) {
+		/* FPGA Config Type Fucntion env get                */
+		/* fpcnfmd =  0 Xixlinx/Altera uncompress mode FPGA */
+		/*            1 Altera compress mode FPGA           */
+		fpga_config_mode = getenv_ulong("fpcnfmd", 16, 0x0);
+		
+		if(0 == config_side) {
+			strcpy (fname, "fp01.bin");
+		} else {
+			strcpy (fname, "fp11.bin");
+		}
+		
+		fpconf_debug("# The file name is %s\n",fname);
+	}
+
+	if (2 == fpga_n) {
+		/* FPGA Config Type Fucntion env get                */
+		/* fpcnfmd2 = 0 Xixlinx/Altera uncompress mode FPGA */
+		/*            1 Altera compress mode FPGA           */
+		fpga_config_mode = getenv_ulong("fpcnfmd2", 16, 0x0);
+		
+		if(0 == config_side) {
+			strcpy (fname, "fp02.bin");
+		} else {
+			strcpy (fname, "fp12.bin");
+		}
+		
+		fpconf_debug("# The file name is %s\n",fname);
+	}
+#endif
+	
+	rtn = bord_fpga_config_sub_v2(fname, fpga_n, fpga_config_mode, fstype, fpga_n);
+
+#if 0	
+	if (fpga_config_cwkad) {
+		rtn = bord_fpga_config_sub_v2(fname, fpga_n, fpga_config_mode, fstype, fpga_n); /* workaround */
+	}
+#endif
+	
+	switch(rtn) {
+	case RET_ERROR:
+		printf("Error FPGA#%01d Configuration...Side%01d \n",fpga_n,config_side);
+#if 0
+		CPLD_WRITE(severity_led,0x00000001);	
+		setenv("fpgmode", "0");
+		CPLD_NVS_WRITE(fpga_conf_skip_state,0); 
+		CPLD_NVS_WRITE(fpga_conf_error,1); 
+		CPLD_NVS_WRITE(fpga_conf_side_state,0); 
+		init_fpga_conf_fail_cnt();
+#endif
+		break;
+	case RET_SUCCESS:
+		printf("FPGA#%01d Configured...Side%01d \n",fpga_n,config_side);
+#if 0
+		if(0 == config_side) {
+			setenv("fpgmode", "1");
+			CPLD_NVS_WRITE(fpga_conf_side_state,1); 
+		} else {
+			setenv("fpgmode", "2");
+			CPLD_NVS_WRITE(fpga_conf_side_state,2); 
+		}
+		CPLD_NVS_WRITE(fpga_conf_skip_state,0); 
+		CPLD_NVS_WRITE(fpga_conf_error,0);
+#endif
+		break;
+	case RET_RERY:
+
+//		if (1 == config_side) {
+			printf("Error FPGA#%01d Configuration...Side%01d \n",fpga_n,config_side);
+#if 0
+			CPLD_WRITE(severity_led,0x00000001);	
+			setenv("fpgmode", "0");
+			CPLD_NVS_WRITE(fpga_conf_skip_state,0); 
+			CPLD_NVS_WRITE(fpga_conf_error,1); 
+			CPLD_NVS_WRITE(fpga_conf_side_state,0); 
+			init_fpga_conf_fail_cnt();
+#endif		
+			rtn = RET_ERROR;
+//		}
+		break;
+	default:
+		break;
+	}
+	
+	
+	return (rtn);
+	
+	
+}
+
+void bord_fpga_config(void)
+{
+	volatile unsigned int i=0;
+//	volatile unsigned int start_chk_bit=0;
+//	int func_val=0;
+	int fp_config_typ=0;
+	int func_val_sata=0;
+	unsigned int config_side=0;
+	
+	//stanley add
+	sata_initialize();
+#if 0	
+	/* Chack FPGA Config SKIP ,When CPU Reset */
+	func_val = bord_fpga_config_reset_skip_jadge();
+	if(1 == func_val){
+		return ;
+	}
+	
+	/* Chack FPGA Config SKIP ,When User Operationt */
+	func_val = bord_fpga_config_user_skip_jadge();
+	if(1 == func_val){
+		return ;
+	}
+#endif
+	
+	/* bit0 = 0 : FPGA1 Config Dissable           */
+	/*        1 : FPGA1 Config Enable             */
+	/* bit1 = 0 : FPGA2 Config Dissable           */
+	/*        1 : FPGA2 Config Enable             */
+#if 0
+	if ( -1 == getenv_yesno("fpgcnfbit")) {
+		fpconf_debug("# Please define  fpgcnfbit  env \n");
+	}
+	
+	fpga_config_cntrl = getenv_ulong("fpgcnfbit", 16, 0x0);
+#endif
+	
+	/* FPGA#n Config Chack */
+//	start_chk_bit = 0x00000001;
+
+	/* Chack FPGA Config Control bit */
+//	for (i=0; i<MAX_FPGA_NUM;i++){
+		
+//		fpconf_debug("# i=%01d start_chk_bit=%08x\n",i,start_chk_bit);
+		
+//		if(fpga_config_cntrl & start_chk_bit){
+			/* if bit on FPGA Config start */
+			
+			/* First Cahack FPGA Config Skip */
+//			if(0 == bord_fpga_config_skip_jadge(i+1)) {
+				
+				/* Call FPGA Config program */
+#if 0
+				printf("Start FPGA#%01d Config...\n",i+1);
+				fp_config_typ=0;
+				fp_config_typ = bord_fpga_config_get_config_typ(i+1);
+				
+				if (fp_config_typ<0) {
+					printf("%s[%d] %s: Func Error FPGA#%01d \n",__FILE__,__LINE__,__FUNCTION__,i+1);
+					fp_config_typ = 0;
+				}
+				
+				if (1 == fp_config_typ) {
+					/* FPGA Config From Boot-Flash */
+					
+					bord_fpga_config_flash(i+1);
+					
+				} else {
+#endif
+					/* FPGA Config From SATA */
+					
+//					func_val_sata = bord_fpga_config_sata(i+1,config_side);
+					func_val_sata = bord_fpga_config_sata(1,config_side);
+					
+#if 0	
+					if(RET_ERROR == func_val_sata) break;
+					if((1 != config_side) && (func_val_sata == RET_RERY)) {
+						puts("Retry FPGA Configuration... \n");
+						config_side=1;
+						i=-1;						/* FPGA#1から continue を強制的に実行させる */
+						start_chk_bit = 0x00000001;
+						continue;
+						
+					}
+#endif
+					
+//				}
+//			}
+#if 0	
+		} else {
+			/* if bit off FPGA Config Process */
+			fpconf_debug("# Dissable FPGA#%01d ...\n",i+1);
+		}
+#endif
+		
+//		start_chk_bit = (start_chk_bit<<(i+1));
+	
+//	}
+	puts("\n");
+	puts("\n");
+	
+}
+#endif
+
+int board_early_init_r(void)
+{
+	const unsigned int flashbase = CONFIG_SYS_FLASH_BASE;
+	const u8 flash_esel = find_tlb_idx((void *)flashbase, 1);
+	/*
+	 * Remap Boot flash + PROMJET region to caching-inhibited
+	 * so that flash can be erased properly.
+	 */
+
+	/* Flush d-cache and invalidate i-cache of any FLASH data */
+	flush_dcache();
+	invalidate_icache();
+
+	/* invalidate existing TLB entry for flash + promjet */
+	disable_tlb(flash_esel);
+
+	set_tlb(1, flashbase, CONFIG_SYS_FLASH_BASE_PHYS,
+		MAS3_SX|MAS3_SW|MAS3_SR, MAS2_I|MAS2_G,
+		0, flash_esel, BOOKE_PAGESZ_256M, 1);
+
+	set_liodns();
+#ifdef CONFIG_SYS_DPAA_QBMAN
+	setup_portals();
+#endif
+
+	return 0;
+}
+
+unsigned long get_board_sys_clk(void)
+{
+	return CONFIG_SYS_CLK_FREQ;
+}
+
+unsigned long get_board_ddr_clk(void)
+{
+	return CONFIG_DDR_CLK_FREQ;
+}
+
+int misc_init_r(void)
+{
+	return 0;
+}
+
+void ft_board_setup(void *blob, bd_t *bd)
+{
+	phys_addr_t base;
+	phys_size_t size;
+
+	ft_cpu_setup(blob, bd);
+
+	base = getenv_bootm_low();
+	size = getenv_bootm_size();
+
+	fdt_fixup_memory(blob, (u64)base, (u64)size);
+
+#ifdef CONFIG_PCI
+	pci_of_setup(blob, bd);
+#endif
+
+	fdt_fixup_liodn(blob);
+	fdt_fixup_dr_usb(blob, bd);
+
+#ifdef CONFIG_SYS_DPAA_FMAN
+	fdt_fixup_fman_ethernet(blob);
+	fdt_fixup_board_enet(blob);
+#endif
+}
