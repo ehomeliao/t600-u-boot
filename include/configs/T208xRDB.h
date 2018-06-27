@@ -185,7 +185,7 @@ unsigned long get_board_sys_clk(void);
 unsigned long get_board_ddr_clk(void);
 #endif
 
-#define CONFIG_SYS_CLK_FREQ	100000000 /* stanley_liu correct system clock setting */
+#define CONFIG_SYS_CLK_FREQ	66660000
 #define CONFIG_DDR_CLK_FREQ	133330000
 
 /*
@@ -218,29 +218,29 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_VERY_BIG_RAM
 #define CONFIG_SYS_DDR_SDRAM_BASE	0x00000000
 #define CONFIG_SYS_SDRAM_BASE		CONFIG_SYS_DDR_SDRAM_BASE
-#define CONFIG_DIMM_SLOTS_PER_CTLR      2	
-#define CONFIG_CHIP_SELECTS_PER_CTRL	(2 * CONFIG_DIMM_SLOTS_PER_CTLR)
+#define CONFIG_DIMM_SLOTS_PER_CTLR      1	
+#define CONFIG_CHIP_SELECTS_PER_CTRL	(4 * CONFIG_DIMM_SLOTS_PER_CTLR)
 #define CONFIG_DDR_SPD
 #define CONFIG_SYS_FSL_DDR3
 #undef CONFIG_FSL_DDR_INTERACTIVE
-#define CONFIG_SYS_SPD_BUS_NUM	1	/* stanley_liu: change from bus0 to bus1 */
+#define CONFIG_SYS_SPD_BUS_NUM	0
 #define CONFIG_SYS_SDRAM_SIZE	2048	/* for fixed parameter use */
-#define SPD_EEPROM_ADDRESS1	0x52	/* stanley_liu: for chip select 0/1 */
-#define SPD_EEPROM_ADDRESS2	0x53	/* stanley_liu: for chip select 2/3 */
+#define SPD_EEPROM_ADDRESS1	0x51
+#define SPD_EEPROM_ADDRESS2	0x52
 #define SPD_EEPROM_ADDRESS	SPD_EEPROM_ADDRESS1
 #define CTRL_INTLV_PREFERED	cacheline
 
 /*
  * IFC Definitions
  */
-#define CONFIG_SYS_FLASH_BASE		0xef000000
+#define CONFIG_SYS_FLASH_BASE		0xe8000000
 #define CONFIG_SYS_FLASH_BASE_PHYS	(0xf00000000ull | CONFIG_SYS_FLASH_BASE)
 #define CONFIG_SYS_NOR0_CSPR_EXT	(0xf)
 #define CONFIG_SYS_NOR0_CSPR	(CSPR_PHYS_ADDR(CONFIG_SYS_FLASH_BASE_PHYS) | \
 				CSPR_PORT_SIZE_16 | \
 				CSPR_MSEL_NOR | \
 				CSPR_V)
-#define CONFIG_SYS_NOR_AMASK	IFC_AMASK(16*1024*1024)
+#define CONFIG_SYS_NOR_AMASK	IFC_AMASK(128*1024*1024)
 
 /* NOR Flash Timing Params */
 #define CONFIG_SYS_NOR_CSOR	CSOR_NAND_TRHZ_80
@@ -506,9 +506,8 @@ unsigned long get_board_ddr_clk(void);
  */
 #define CONFIG_PCI		/* Enable PCI/PCIE */
 #define CONFIG_PCIE1		/* PCIE controler 1 */
-/* stanley_liu: disable PCIE2 PCIE3 */
-/*#define CONFIG_PCIE2 */		/* PCIE controler 2 */
-/*#define CONFIG_PCIE3 */		/* PCIE controler 3 */
+#define CONFIG_PCIE2		/* PCIE controler 2 */
+#define CONFIG_PCIE3		/* PCIE controler 3 */
 #define CONFIG_PCIE4		/* PCIE controler 4 */
 #define CONFIG_FSL_PCI_INIT	/* Use common FSL init code */
 #define CONFIG_SYS_PCI_64BIT	/* enable 64-bit PCI resources */
