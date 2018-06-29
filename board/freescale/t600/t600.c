@@ -17,6 +17,7 @@
 #include <asm/fsl_portals.h>
 #include <asm/fsl_liodn.h>
 #include <fm_eth.h>
+#include <fs.h>
 #include "t600.h"
 #include "cpld.h"
 #ifdef CONFIG_CDEC_CPLD
@@ -59,6 +60,19 @@ int checkboard(void)
 }
 
 #ifdef CONFIG_CDEC_CPLD
+static int  bord_fpga_config_reset_skip_jadge(void)
+{
+
+	/* TODO: check CPU reset instead of BMCNT PCIE present */
+	pci_dev_t dev;
+	dev = pci_find_device (MBCNT_VENDER_ID, MBCNT_DEVICE_ID, 0);
+	if (dev == -1) {
+		return 0;
+	}
+	printf(" MBCNT BAR0=0x%x\n", (uint32_t)pci_map_bar(dev, PCI_BASE_ADDRESS_0, PCI_REGION_MEM));
+	return 1;
+}
+
 static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_config_index, unsigned int fpga_config_mode, int fstype, unsigned int fpga_n)
 {
 	unsigned int fpga_config_size=0;
@@ -190,7 +204,7 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 {
 	/* FPGA Config From SATA */
-	unsigned int fpga_config_cwkad=0;
+//	unsigned int fpga_config_cwkad=0;
 	
 	unsigned int fpga_config_mode=0;
 	unsigned int rtn=0;
@@ -303,21 +317,24 @@ static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 
 void bord_fpga_config(void)
 {
-	volatile unsigned int i=0;
+//	volatile unsigned int i=0;
 //	volatile unsigned int start_chk_bit=0;
-//	int func_val=0;
-	int fp_config_typ=0;
-	int func_val_sata=0;
+	int func_val=0;
+//	int fp_config_typ=0;
+//	int func_val_sata=0;
 	unsigned int config_side=0;
 	
-	//stanley add
+	/* TODO: move to board init */ 
 	sata_initialize();
-#if 0	
+
 	/* Chack FPGA Config SKIP ,When CPU Reset */
 	func_val = bord_fpga_config_reset_skip_jadge();
 	if(1 == func_val){
+		printf("Skip load MBCNT since it is present\n");
 		return ;
 	}
+
+#if 0
 	
 	/* Chack FPGA Config SKIP ,When User Operationt */
 	func_val = bord_fpga_config_user_skip_jadge();
@@ -373,7 +390,7 @@ void bord_fpga_config(void)
 					/* FPGA Config From SATA */
 					
 //					func_val_sata = bord_fpga_config_sata(i+1,config_side);
-					func_val_sata = bord_fpga_config_sata(1,config_side);
+					bord_fpga_config_sata(1,config_side);
 					
 #if 0	
 					if(RET_ERROR == func_val_sata) break;

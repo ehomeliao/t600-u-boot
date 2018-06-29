@@ -1,4 +1,3 @@
-
 #define FPGA_CONFIG_RAM_START_ADR	0x1000000
 #define WAIT_30MS							30000
 #define RET_SUCCESS						0
@@ -25,4 +24,9 @@
 #define PIU_PWR_CTRL				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa00400))
 #define TX_DIS						(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0x1900004))
 
+#define MBCNT_VENDER_ID			0x10cf
+#define MBCNT_DEVICE_ID			0x0021
+
 #define msleep(a)    udelay(a * 1000)
+
+int fpga_config_main(unsigned int fpga, unsigned int mode,unsigned int size);
