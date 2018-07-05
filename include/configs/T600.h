@@ -5,11 +5,11 @@
  */
 
 /*
- * T2080 RDB/PCIe board configuration file
+ * T600 PCIe board configuration file
  */
 
-#ifndef __T2080RDB_H
-#define __T2080RDB_H
+#ifndef __T600_H
+#define __T600_H
 
 #define CONFIG_SYS_GENERIC_BOARD
 #define CONFIG_DISPLAY_BOARDINFO
@@ -791,8 +791,9 @@ unsigned long get_board_ddr_clk(void);
  */
 #define CONFIG_ROOTPATH	 "/opt/nfsroot"
 #define CONFIG_BOOTFILE	 "uImage"
-#define CONFIG_UBOOTPATH "u-boot-T2080RDB.bin"		/* U-Boot image on USB */
+#define CONFIG_UBOOTPATH "u-boot-T600.bin"		/* U-Boot image on USB */
 #define CONFIG_RCWPATH   "PBL_T600.img"	/* RCW image on USB */
+#define CONFIG_FMANPATH  "fsl_fman_ucode_t2080_r1.1_106_4_14.bin"
 
 /* default location for tftp and bootm */
 #define CONFIG_LOADADDR		1000000
@@ -808,6 +809,7 @@ unsigned long get_board_ddr_clk(void);
 	"netdev=eth0\0"						\
 	"uboot=" __stringify(CONFIG_UBOOTPATH) "\0"		\
 	"rcw=" __stringify(CONFIG_RCWPATH) "\0"		\
+	"fmanbin="__stringify(CONFIG_FMANPATH) "\0"	\
 	"bootfrom=ssd\0"	\
 	"ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"	\
 	"uboot_load=usb start && fatload usb 0:1 0x1000000 /T600/$uboot && "	\
@@ -816,10 +818,13 @@ unsigned long get_board_ddr_clk(void);
 	"rcw_load=usb start && fatload usb 0:1 0x1000000 /T600/$rcw && "	\
 	"protect off all && erase 0xEF000000 0xEF01FFFF && " \
 	"cp.b 0x1000000 0xEF000000 0x50\0"	\
+	"fman_load=usb start && fatload usb 0:1 0x1000000 /T600/$fmanbin && "	\
+	"protect off all && erase 0xEFF00000 0xEFF1FFFF && " \
+	"cp.b 0x1000000 0xEFF00000 0x8000\0"	\
 	"consoledev=ttyS0\0"					\
 	"ramdiskaddr=2000000\0"					\
 	"ramdiskfile=/T600/fsl-image-core-t2080rdb-64b.ext2.gz.u-boot\0"			\
-	"fdtaddr=c00000\0"					\
+	"fdtaddr=f000000\0"					\
 	"fdtfile=/T600/uImage-t2080rdb.dtb\0"			\
 	"bootfile=/T600/uImage\0"			\
 	"ssdboot=fatload sata 1 $ramdiskaddr $ramdiskfile; "	\
@@ -864,7 +869,7 @@ unsigned long get_board_ddr_clk(void);
 	"setenv bootargs root=/dev/ram rw "		\
 	"console=$consoledev,$baudrate $othbootargs;"	\
 	"setenv ramdiskaddr 0x02000000;"		\
-	"setenv fdtaddr 0x00c00000;"			\
+	"setenv fdtaddr 0x0f000000;"			\
 	"setenv loadaddr 0x1000000;"			\
 	"if test ${bootfrom} = ssd; then run ssdboot; else run usbboot; fi; "	\
 	"bootm $loadaddr $ramdiskaddr $fdtaddr"
@@ -900,4 +905,4 @@ unsigned long get_board_ddr_clk(void);
 #undef CONFIG_CMD_USB
 #endif
 
-#endif	/* __T2080RDB_H */
+#endif	/* __T600_H */

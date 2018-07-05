@@ -23,9 +23,26 @@
 #include <phy.h>
 #include <asm/fsl_dtsec.h>
 #include <asm/fsl_serdes.h>
+#include <i2c.h>
 
 int board_eth_init(bd_t *bis)
 {
+	unsigned int dir = 0x30000000, val =0x30000000;
+   uint8_t mode;
+
+	/* Set GPIO3_3 as 1 to release BCM5389 reset */
+	ccsr_gpio_t *gpio3 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x2000);
+
+	dir |= (in_be32(&gpio3->gpdir) & 0xefffffff);
+	val |= (in_be32(&gpio3->gpdat) & 0xefffffff);
+	out_be32(&gpio3->gpdat, val);
+	out_be32(&gpio3->gpdir, dir);
+
+	/* Set CPLD to select BCM5389 as CPU mode  */
+	i2c_set_bus_num(0);
+	mode = 0x3;
+	i2c_write(0x60, 0x15, 1, &mode, 1);
+
 #if defined(CONFIG_FMAN_ENET)
 	int i, interface;
 	struct memac_mdio_info dtsec_mdio_info;
