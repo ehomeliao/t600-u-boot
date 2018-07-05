@@ -73,6 +73,70 @@ static int  bord_fpga_config_reset_skip_jadge(void)
 	return 1;
 }
 
+static int board_abortfpgaconf(int configdelay)
+{
+	int abort = 0;
+
+	printf("Hit any key to skip FPGA Config: %2d ", configdelay);
+
+	/*
+	 * Check if key already pressed
+	 * Don't check if configdelay < 0
+	 */
+	if (configdelay >= 0) {
+		if (tstc()) {			/* we got a key press	*/
+			(void) getc();		/* consume input	*/
+			puts ("\b\b\b 0");
+			abort = 1;			/* don't auto boot	*/
+		}
+	}
+
+	while ((configdelay > 0) && (!abort)) {
+		int i;
+
+		--configdelay;
+		/* delay 100 * 10ms */
+		for (i=0; !abort && i<100; ++i) {
+			if (tstc()) {			/* we got a key press	*/
+				abort  = 1;			/* don't auto boot	*/
+				configdelay = 0;	/* no more delay	*/
+				(void) getc();		/* consume input	*/
+				break;
+			}
+			udelay(10000);
+		}
+
+		printf("\b\b\b%2d ", configdelay);
+	}
+
+	putc('\n');
+
+
+	return abort;
+}
+
+static int bord_fpga_config_user_skip_jadge(void)
+{
+	unsigned int rtn=1;
+	int configdelay=3;
+	
+	if (configdelay >= 0 && !board_abortfpgaconf(configdelay)) {
+		rtn=0;
+		
+	} else { /* config delay */
+		puts("SKIP FPGA Config(USER OPERATION)... \n");
+#if 0
+		setenv("fpgmode", "0");
+		CPLD_NVS_WRITE(fpga_conf_skip_state,0); 
+		CPLD_NVS_WRITE(fpga_conf_error,1); 
+		CPLD_NVS_WRITE(fpga_conf_side_state,0); 
+		init_fpga_conf_fail_cnt();
+#endif
+	}
+	
+	return (rtn);
+	
+}
 static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_config_index, unsigned int fpga_config_mode, int fstype, unsigned int fpga_n)
 {
 	unsigned int fpga_config_size=0;
@@ -317,108 +381,34 @@ static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 
 void bord_fpga_config(void)
 {
-//	volatile unsigned int i=0;
-//	volatile unsigned int start_chk_bit=0;
-	int func_val=0;
-//	int fp_config_typ=0;
-//	int func_val_sata=0;
-	unsigned int config_side=0;
+	unsigned int config_side = 0;
 	
 	/* TODO: move to board init */ 
 	sata_initialize();
 
-	/* Chack FPGA Config SKIP ,When CPU Reset */
-	func_val = bord_fpga_config_reset_skip_jadge();
-	if(1 == func_val){
-		printf("Skip load MBCNT since it is present\n");
-		return ;
+	if (getenv_ulong("fpgaskip", 16, 0x0) == 1) {
+		printf("SKIP FPGA Config(SKIP ENV FLAG)...\n");
+		return;
 	}
-
-#if 0
 	
 	/* Chack FPGA Config SKIP ,When User Operationt */
-	func_val = bord_fpga_config_user_skip_jadge();
-	if(1 == func_val){
+	if (1 == bord_fpga_config_user_skip_jadge()) {
 		return ;
 	}
-#endif
 	
-	/* bit0 = 0 : FPGA1 Config Dissable           */
-	/*        1 : FPGA1 Config Enable             */
-	/* bit1 = 0 : FPGA2 Config Dissable           */
-	/*        1 : FPGA2 Config Enable             */
-#if 0
-	if ( -1 == getenv_yesno("fpgcnfbit")) {
-		fpconf_debug("# Please define  fpgcnfbit  env \n");
+	/* Chack FPGA Config SKIP ,When CPU Reset */
+	if(1 == bord_fpga_config_reset_skip_jadge()) {
+		printf("SKIP FPGA Config since it is present\n");
+		return ;
 	}
-	
-	fpga_config_cntrl = getenv_ulong("fpgcnfbit", 16, 0x0);
-#endif
-	
-	/* FPGA#n Config Chack */
-//	start_chk_bit = 0x00000001;
 
-	/* Chack FPGA Config Control bit */
-//	for (i=0; i<MAX_FPGA_NUM;i++){
-		
-//		fpconf_debug("# i=%01d start_chk_bit=%08x\n",i,start_chk_bit);
-		
-//		if(fpga_config_cntrl & start_chk_bit){
-			/* if bit on FPGA Config start */
-			
-			/* First Cahack FPGA Config Skip */
-//			if(0 == bord_fpga_config_skip_jadge(i+1)) {
-				
-				/* Call FPGA Config program */
-#if 0
-				printf("Start FPGA#%01d Config...\n",i+1);
-				fp_config_typ=0;
-				fp_config_typ = bord_fpga_config_get_config_typ(i+1);
-				
-				if (fp_config_typ<0) {
-					printf("%s[%d] %s: Func Error FPGA#%01d \n",__FILE__,__LINE__,__FUNCTION__,i+1);
-					fp_config_typ = 0;
-				}
-				
-				if (1 == fp_config_typ) {
-					/* FPGA Config From Boot-Flash */
-					
-					bord_fpga_config_flash(i+1);
-					
-				} else {
-#endif
-					/* FPGA Config From SATA */
-					
-//					func_val_sata = bord_fpga_config_sata(i+1,config_side);
-					bord_fpga_config_sata(1,config_side);
-					
-#if 0	
-					if(RET_ERROR == func_val_sata) break;
-					if((1 != config_side) && (func_val_sata == RET_RERY)) {
-						puts("Retry FPGA Configuration... \n");
-						config_side=1;
-						i=-1;						/* FPGA#1から continue を強制的に実行させる */
-						start_chk_bit = 0x00000001;
-						continue;
-						
-					}
-#endif
-					
-//				}
-//			}
-#if 0	
-		} else {
-			/* if bit off FPGA Config Process */
-			fpconf_debug("# Dissable FPGA#%01d ...\n",i+1);
-		}
-#endif
-		
-//		start_chk_bit = (start_chk_bit<<(i+1));
-	
-//	}
+	if (RET_RERY == bord_fpga_config_sata(1,config_side)) {
+		puts("Retry FPGA Configuration... \n");
+		bord_fpga_config_sata(1,++config_side);
+	}
+
 	puts("\n");
 	puts("\n");
-	
 }
 
 void board_fpga_init(void)

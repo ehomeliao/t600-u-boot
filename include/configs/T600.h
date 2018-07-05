@@ -831,6 +831,7 @@ unsigned long get_board_ddr_clk(void);
 	"fatload sata 1 $loadaddr $bootfile; fatload sata 1 $fdtaddr $fdtfile;\0"	\
 	"usbboot=usb start; fatload usb 0:1 $ramdiskaddr $ramdiskfile; "	\
 	"fatload usb 0:1 $loadaddr $bootfile; fatload usb 0:1 $fdtaddr $fdtfile;\0" \
+	"fpgaskip=0\0"	\
 	"bdev=sda3\0"
 
 /*
