@@ -297,6 +297,10 @@ int mac_read_from_eeprom(void);
 extern u8 __dtb_dt_begin[];	/* embedded device tree blob */
 int set_cpu_clk_info(void);
 int mdm_init(void);
+#ifdef CONFIG_CDEC_CPLD
+void bord_fpga_config(void);
+void board_fpga_init(void);
+#endif
 #if defined(CONFIG_DISPLAY_CPUINFO)
 int print_cpuinfo(void);
 #else

@@ -158,10 +158,16 @@ int fpga_config_main(unsigned int fpga, unsigned int mode,unsigned int size)
 		
 	}
 	
-	/* TODO: move following setting to init_cdec_cpld() */
+	return RET_SUCCESS;
+}
 
+int cdec_cpld_init(void)
+{
+	unsigned int read_reg=0;
+
+	printf("cdec_cpld_init.....\n");
 	/* PIU Power Enable */
-	PIU_PWR_CTRL = 0x0;
+	PIU_PWR_CTRL = 0x3;
 
 	/* Wait 1000ms */
 	msleep(1000);

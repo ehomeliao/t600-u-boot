@@ -420,6 +420,11 @@ void bord_fpga_config(void)
 	puts("\n");
 	
 }
+
+void board_fpga_init(void)
+{
+	cdec_cpld_init();
+} 
 #endif
 
 int board_early_init_r(void)

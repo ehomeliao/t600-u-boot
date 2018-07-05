@@ -704,14 +704,6 @@ static int initr_kbd(void)
 }
 #endif
 
-#ifdef CONFIG_CDEC_CPLD
-static int fpga_config(void)
-{
-	bord_fpga_config();
-
-	return 0;
-}
-#endif
 
 static int run_main_loop(void)
 {
@@ -926,9 +918,6 @@ init_fnc_t init_sequence_r[] = {
 #endif
 #ifdef CONFIG_PS2KBD
 	initr_kbd,
-#endif
-#ifdef CONFIG_CDEC_CPLD
-	fpga_config,
 #endif
 	run_main_loop,
 };
