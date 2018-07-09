@@ -19,8 +19,29 @@
 #define WDT_ALM_MSK				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0x000090))
 #define WDT_ALM_STATUS			(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0x00009c))
 #define SEVERITY_LED				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0x000304))
+#define SEVERITY_LED_OFF		0x00000000
+#define SEVERITY_RED_ON			0x00000001
+#define SEVERITY_RED_BLINNK_L	0x00000002
+#define SEVERITY_RED_BLINNK_H	0x00000004
+#define SEVERITY_YEL_ON			0x00000100
+#define SEVERITY_YEL_BLINNK_L	0x00000200
+#define SEVERITY_YEL_BLINNK_H	0x00000400
+#define SYS_LED					(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0x00030c))
+#define SYS_RED_OFF				0x00000000
+#define SYS_RED_ON				0x00000001
+#define SYS_RED_BLINK_L			0x00000002
+#define SYS_RED_BLINK_H			0x00000004
+#define SYS_GREEN_ON				0x00000010
+#define SYS_GREEN_BLINK_L		0x00000020
+#define SYS_GREEN_BLINK_H		0x00000040
+#define SYS_YEL_ON				0x00000100
+#define SYS_YEL_BLINK_L			0x00000200
+#define SYS_YEL_BLINK_H			0x00000400
 #define MBCNT_RESET				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa00034))
 #define PIU_RESET					(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa00038))
+#define PIU_PWR_CTRL				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa00400))
+#define PIU_ALM_FORCE			(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa0051c))
+#define PIU_ALM_MASK				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa0053c))
 #define PIU_PWR_CTRL				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa00400))
 #define TX_DIS						(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0x1900004))
 

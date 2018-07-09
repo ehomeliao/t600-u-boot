@@ -31,27 +31,7 @@ int checkboard(void)
 	struct cpu_type *cpu = gd->arch.cpu;
 	static const char *freq[3] = {"100.00MHZ", "125.00MHz", "156.25MHZ"};
 
-	printf("Board: T600, ");
-	printf("Board rev: 0x%02x CPLD ver: 0x%02x, boot from ",
-	       CPLD_READ(hw_ver), CPLD_READ(sw_ver));
-
-#ifdef CONFIG_SDCARD
-	puts("SD/MMC\n");
-#elif CONFIG_SPIFLASH
-	puts("SPI\n");
-#else
-	u8 reg;
-
-	reg = CPLD_READ(flash_csr);
-
-	if (reg & CPLD_BOOT_SEL) {
-		puts("NAND\n");
-	} else {
-		reg = ((reg & CPLD_LBMAP_MASK) >> CPLD_LBMAP_SHIFT);
-		printf("NOR vBank%d\n", reg);
-	}
-#endif
-
+	printf("Board: T600\n");
 	puts("SERDES Reference Clocks:\n");
 	printf("SD1_CLK1=%s, SD1_CLK2=%s\n", freq[2], freq[0]);
 	printf("SD2_CLK1=%s, SD2_CLK2=%s\n", freq[0], freq[0]);
@@ -331,6 +311,7 @@ static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 	switch(rtn) {
 	case RET_ERROR:
 		printf("Error FPGA#%01d Configuration...Side%01d \n",fpga_n,config_side);
+		SEVERITY_LED = SEVERITY_RED_ON;
 #if 0
 		CPLD_WRITE(severity_led,0x00000001);	
 		setenv("fpgmode", "0");
@@ -358,6 +339,7 @@ static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 
 //		if (1 == config_side) {
 			printf("Error FPGA#%01d Configuration...Side%01d \n",fpga_n,config_side);
+			SEVERITY_LED = SEVERITY_RED_ON;
 #if 0
 			CPLD_WRITE(severity_led,0x00000001);	
 			setenv("fpgmode", "0");

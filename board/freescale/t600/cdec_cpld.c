@@ -21,7 +21,7 @@
 #include "cdec_cpld.h"
 
 
-#define CDEC_CPLD_DEBUG
+//#define CDEC_CPLD_DEBUG
 
 #ifdef CDEC_CPLD_DEBUG
 #define    debug_printf(x) printf x
@@ -94,7 +94,7 @@ int fpga_config_main(unsigned int fpga, unsigned int mode,unsigned int size)
 		if(read_reg & 0x1) {
 			/* Configuration Start Error. */
 			/* FULT */
-			SEVERITY_LED = 0x00000001;
+			SEVERITY_LED = SEVERITY_RED_ON;
 #if 0
 			CPLD_WRITE(severity_led,0x00000001);
 			cpld_debug("W %08x <== %08x\n",(unsigned int)((offsetof(cpld_data_t, severity_led) + CPLD_BASE)),0x00000001);
@@ -139,7 +139,7 @@ int fpga_config_main(unsigned int fpga, unsigned int mode,unsigned int size)
 				/* Configuration Initialization Error */
 				
 				/* FULT */
-				SEVERITY_LED = 0x00000001;
+				SEVERITY_LED = SEVERITY_RED_ON;
 #if 0
 				CPLD_WRITE(severity_led,0x00000001);
 				cpld_debug("W %08x <== %08x\n",(unsigned int)((offsetof(cpld_data_t, severity_led) + CPLD_BASE)),0x00000001);
@@ -165,7 +165,11 @@ int cdec_cpld_init(void)
 {
 	unsigned int read_reg=0;
 
-	printf("cdec_cpld_init.....\n");
+	/* Turn SYS LED */
+	PIU_ALM_FORCE = 0x300;
+	PIU_ALM_MASK = 0x300;
+	SYS_LED = SYS_GREEN_ON;
+
 	/* PIU Power Enable */
 	PIU_PWR_CTRL = 0x3;
 
