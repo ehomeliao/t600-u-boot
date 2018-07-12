@@ -810,6 +810,7 @@ int fsl_pcie_init_board(int busno)
 #endif
 	devdisr = in_be32(addr);
 
+#ifdef CONFIG_CDEC_CPLD
 /* Since CDEC is in PCIE4, init it first */
 #ifdef CONFIG_PCIE4
 	SET_STD_PCIE_INFO(pci_info, 4);
@@ -819,8 +820,16 @@ int fsl_pcie_init_board(int busno)
 #endif
 
 	/* Load MBCNT before PCIE1 init */
-	bord_fpga_config();
-	board_fpga_init();
+	dev = pci_find_device (0x10cf, 0x0000, 0);
+	if (dev == -1) {
+		printf("!!! Cannot find FJ CDEC !!!\n");
+	} else {
+		printf("FJ CDEC BAR0=0x%x\n", (uint32_t)pci_map_bar(dev, PCI_BASE_ADDRESS_0, PCI_REGION_MEM));
+		board_fpga_preinit();
+		bord_fpga_config();
+		board_fpga_init();
+	}
+#endif
 
 #ifdef CONFIG_PCIE1
 	SET_STD_PCIE_INFO(pci_info, 1);
@@ -843,7 +852,7 @@ int fsl_pcie_init_board(int busno)
 	setbits_be32(addr, _DEVDISR_PCIE3); /* disable */
 #endif
 
-#if 0
+#ifndef CONFIG_CDEC_CPLD
 #ifdef CONFIG_PCIE4
 	SET_STD_PCIE_INFO(pci_info, 4);
 	busno = fsl_pcie_init_ctrl(busno, devdisr, PCIE4, &pci_info);
@@ -852,12 +861,6 @@ int fsl_pcie_init_board(int busno)
 #endif
 #endif
 
-	dev = pci_find_device (0x10cf, 0x0000, 0);
-	if (dev == -1) {
-		printf("!!! Cannot find FJ CDEC !!!\n");
-	} else {
-		printf(" CDEC BAR0=0x%x\n", (uint32_t)pci_map_bar(dev, PCI_BASE_ADDRESS_0, PCI_REGION_MEM));
-	}
  	return busno;
 }
 #else

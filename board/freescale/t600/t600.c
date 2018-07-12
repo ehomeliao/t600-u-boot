@@ -312,6 +312,7 @@ static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 	case RET_ERROR:
 		printf("Error FPGA#%01d Configuration...Side%01d \n",fpga_n,config_side);
 		SEVERITY_LED = SEVERITY_RED_ON;
+		SYS_LED = SYS_RED_ON;
 #if 0
 		CPLD_WRITE(severity_led,0x00000001);	
 		setenv("fpgmode", "0");
@@ -340,6 +341,7 @@ static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 //		if (1 == config_side) {
 			printf("Error FPGA#%01d Configuration...Side%01d \n",fpga_n,config_side);
 			SEVERITY_LED = SEVERITY_RED_ON;
+			SYS_LED = SYS_RED_ON;
 #if 0
 			CPLD_WRITE(severity_led,0x00000001);	
 			setenv("fpgmode", "0");
@@ -391,6 +393,11 @@ void bord_fpga_config(void)
 
 	puts("\n");
 	puts("\n");
+}
+
+void board_fpga_preinit(void)
+{
+	cdec_cpld_preinit();
 }
 
 void board_fpga_init(void)

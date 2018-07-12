@@ -299,6 +299,7 @@ int set_cpu_clk_info(void);
 int mdm_init(void);
 #ifdef CONFIG_CDEC_CPLD
 void bord_fpga_config(void);
+void board_fpga_preinit(void);
 void board_fpga_init(void);
 #endif
 #if defined(CONFIG_DISPLAY_CPUINFO)

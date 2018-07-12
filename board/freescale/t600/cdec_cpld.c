@@ -95,6 +95,7 @@ int fpga_config_main(unsigned int fpga, unsigned int mode,unsigned int size)
 			/* Configuration Start Error. */
 			/* FULT */
 			SEVERITY_LED = SEVERITY_RED_ON;
+			SYS_LED = SYS_RED_ON;
 #if 0
 			CPLD_WRITE(severity_led,0x00000001);
 			cpld_debug("W %08x <== %08x\n",(unsigned int)((offsetof(cpld_data_t, severity_led) + CPLD_BASE)),0x00000001);
@@ -140,6 +141,7 @@ int fpga_config_main(unsigned int fpga, unsigned int mode,unsigned int size)
 				
 				/* FULT */
 				SEVERITY_LED = SEVERITY_RED_ON;
+				SYS_LED = SYS_RED_ON;
 #if 0
 				CPLD_WRITE(severity_led,0x00000001);
 				cpld_debug("W %08x <== %08x\n",(unsigned int)((offsetof(cpld_data_t, severity_led) + CPLD_BASE)),0x00000001);
@@ -161,14 +163,21 @@ int fpga_config_main(unsigned int fpga, unsigned int mode,unsigned int size)
 	return RET_SUCCESS;
 }
 
-int cdec_cpld_init(void)
+int cdec_cpld_preinit(void)
 {
-	unsigned int read_reg=0;
-
 	/* Turn SYS LED */
 	PIU_ALM_FORCE = 0x300;
 	PIU_ALM_MASK = 0x300;
-	SYS_LED = SYS_GREEN_ON;
+	SYS_LED = SYS_YEL_ON;
+
+	/* Turn off ALM LED */
+	SEVERITY_LED = SEVERITY_LED_OFF;
+
+}
+
+int cdec_cpld_init(void)
+{
+	unsigned int read_reg=0;
 
 	/* PIU Power Enable */
 	PIU_PWR_CTRL = 0x3;

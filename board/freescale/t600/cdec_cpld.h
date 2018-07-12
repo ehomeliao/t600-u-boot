@@ -27,7 +27,7 @@
 #define SEVERITY_YEL_BLINNK_L	0x00000200
 #define SEVERITY_YEL_BLINNK_H	0x00000400
 #define SYS_LED					(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0x00030c))
-#define SYS_RED_OFF				0x00000000
+#define SYS_LED_OFF				0x00000000
 #define SYS_RED_ON				0x00000001
 #define SYS_RED_BLINK_L			0x00000002
 #define SYS_RED_BLINK_H			0x00000004
