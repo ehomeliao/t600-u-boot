@@ -17,7 +17,7 @@
 #define CONFIG_CDEC_CPLD
 
 #define CONFIG_ICS307_REFCLK_HZ 25000000  /* ICS307 ref clk freq */
-#define CONFIG_MMC
+/* define CONFIG_MMC */
 #define CONFIG_SPI_FLASH
 #define CONFIG_USB_EHCI
 #define CONFIG_FSL_SATA_V2
@@ -686,6 +686,7 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_CMD_SATA
 #define CONFIG_DOS_PARTITION
 #define CONFIG_CMD_EXT2
+#define CONFIG_CMD_FAT
 #endif
 
 /*
