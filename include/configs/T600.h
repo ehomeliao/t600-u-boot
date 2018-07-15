@@ -557,7 +557,7 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_PCI_INDIRECT_BRIDGE
 #define CONFIG_FSL_PCIE_RESET           /* need PCIe reset errata LSZ ADD */
 #define CONFIG_NET_MULTI
-#define CONFIG_E1000
+/* #define CONFIG_E1000 */
 #define CONFIG_PCI_PNP		/* do pci plug-and-play */
 #define CONFIG_PCI_SCAN_SHOW	/* show pci devices on startup */
 #define CONFIG_DOS_PARTITION
@@ -650,16 +650,8 @@ unsigned long get_board_ddr_clk(void);
 #ifdef CONFIG_SYS_DPAA_FMAN
 #define CONFIG_FMAN_ENET
 #define CONFIG_PHYLIB_10G
-#define CONFIG_PHY_CORTINA
-#define CONFIG_PHY_AQ1202
-#define CONFIG_PHY_REALTEK
-#define CONFIG_CORTINA_FW_LENGTH	0x40000
 #define RGMII_PHY1_ADDR		0x01  /* RealTek RTL8211E */
 #define RGMII_PHY2_ADDR		0x02
-#define CORTINA_PHY_ADDR1	0x0c  /* Cortina CS4315 */
-#define CORTINA_PHY_ADDR2	0x0d
-#define FM1_10GEC3_PHY_ADDR	0x00  /* Aquantia AQ1202 10G Base-T */
-#define FM1_10GEC4_PHY_ADDR	0x01
 #endif
 
 

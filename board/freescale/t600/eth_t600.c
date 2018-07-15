@@ -74,6 +74,7 @@ int board_eth_init(bd_t *bis)
 	fm_info_set_phy_address(FM1_DTSEC3, RGMII_PHY1_ADDR);
 	fm_info_set_phy_address(FM1_DTSEC4, RGMII_PHY2_ADDR);
 
+#if 0
 	switch (srds_s1) {
 	case 0x66:
 	case 0x6b:
@@ -87,6 +88,7 @@ int board_eth_init(bd_t *bis)
 		       srds_s1);
 		break;
 	}
+#endif
 
 	for (i = FM1_DTSEC1; i < FM1_DTSEC1 + CONFIG_SYS_NUM_FM1_DTSEC; i++) {
 		interface = fm_info_get_enet_if(i);
@@ -96,6 +98,7 @@ int board_eth_init(bd_t *bis)
 			fm_info_set_mdio(i, dev);
 			break;
 		default:
+			fm_disable_port(i);
 			break;
 		}
 	}
@@ -109,6 +112,7 @@ int board_eth_init(bd_t *bis)
 		default:
 			break;
 		}
+		fm_disable_port(i);
 	}
 
 	cpu_eth_init(bis);
