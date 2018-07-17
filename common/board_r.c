@@ -419,6 +419,15 @@ int initr_dataflash(void)
 }
 #endif
 
+#if defined(CONFIG_CMD_SATA) && defined(CONFIG_FSL_SATA) && defined(CONFIG_INIT_SATA)
+int initr_sata(void)
+{
+	puts("SATA:  ");
+	sata_initialize();
+}
+#endif
+
+
 /*
  * Tell if it's OK to load the environment early in boot.
  *
@@ -814,6 +823,9 @@ init_fnc_t init_sequence_r[] = {
 #endif
 #ifdef CONFIG_HAS_DATAFLASH
 	initr_dataflash,
+#endif
+#if defined(CONFIG_CMD_SATA) && defined(CONFIG_FSL_SATA) && defined(CONFIG_INIT_SATA)
+	initr_sata,
 #endif
 	initr_env,
 	INIT_FUNC_WATCHDOG_RESET

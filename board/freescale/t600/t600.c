@@ -366,9 +366,6 @@ static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 void bord_fpga_config(void)
 {
 	unsigned int config_side = 0;
-	
-	/* TODO: move to board init */ 
-	sata_initialize();
 
 	if (getenv_ulong("fpgaskip", 16, 0x0) == 1) {
 		printf("SKIP FPGA Config(SKIP ENV FLAG)...\n");
