@@ -33,7 +33,7 @@ int checkboard(void)
 
 	printf("Board: T600\n");
 	puts("SERDES Reference Clocks:\n");
-	printf("SD1_CLK1=%s, SD1_CLK2=%s\n", freq[2], freq[1]);
+	printf("SD1_CLK1=%s, SD1_CLK2=%s\n", freq[2], freq[0]);
 	printf("SD2_CLK1=%s, SD2_CLK2=%s\n", freq[0], freq[0]);
 
 	return 0;
