@@ -807,8 +807,8 @@ unsigned long get_board_ddr_clk(void);
 	"bootfrom=ssd\0"	\
 	"ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"	\
 	"uboot_load=usb start && fatload usb 0:1 0x1000000 /T600/$uboot && "	\
-	"protect off all && erase 0xEFF40000 0xEFFFFFFF && " \
-	"cp.b 0x1000000 0xEFF40000 0xC0000\0"			\
+	"norprotect disable && protect off all && erase 0xEFF40000 0xEFFFFFFF && " \
+	"cp.b 0x1000000 0xEFF40000 0xC0000 && norprotect enable\0"			\
 	"rcw_load=usb start && fatload usb 0:1 0x1000000 /T600/$rcw && "	\
 	"protect off all && erase 0xEF000000 0xEF01FFFF && " \
 	"cp.b 0x1000000 0xEF000000 0x50\0"	\

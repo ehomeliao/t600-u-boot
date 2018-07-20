@@ -266,4 +266,8 @@ obj-y += s_record.o
 obj-y += xyzModem.o
 obj-y += cmd_disk.o
 
+ifdef CONFIG_T600
+obj-y += cmd_norprotect.o
+endif
+
 CFLAGS_env_embedded.o := -Wa,--no-warn -DENV_CRC=$(shell tools/envcrc 2>/dev/null)
