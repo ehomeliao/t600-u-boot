@@ -206,5 +206,8 @@ int cdec_cpld_init(void)
 	/* Clear WDT Alarm */
 	read_reg = WDT_ALM_MSK;
 
+	/* Wait 1000ms, PIU1 of some device need delay for PCIE scaning later */
+	/* TODO: Need more test if we oould reduce the delay time */
+	msleep(1000);
 	return RET_SUCCESS;
 }
