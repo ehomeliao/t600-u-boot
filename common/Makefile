@@ -267,6 +267,7 @@ obj-y += xyzModem.o
 obj-y += cmd_disk.o
 
 ifdef CONFIG_T600
+obj-y += cmd_inventory.o
 obj-y += cmd_norprotect.o
 endif
 
