@@ -64,7 +64,7 @@ extern unsigned int inv_dbg;
 
 #define CODE_CPSIE			0x0001	// T.B.D.
 #define CODE_CPULP			0x0002	// T.B.D.
-#define CODE_CPUTP			0x0003	// T.B.D.
+#define CODE_CPUTP			0xA600
 #define CODE_CPUSP			0x1111
 #define CODE_FPSIE			0x0005	// T.B.D.
 #define CODE_FPULP			0x0006	// T.B.D.
@@ -332,11 +332,11 @@ struct inventory_info_t pi_default_cputp =
 	CODE_CPUTP,		// (1)
 	0x01,			// (2)
 	" 01",			// (3)
-	"BDS1-BEA1",	// (4)
-	"FC9543BEA1",	// (5)
-	"WOTRC6AJAA",	// (6)
-	"YY.MM",		// (7)
-	"01",			// (8)
+	"BDT6-T600",		/* (4) */
+	"FC9569T600",		/* (5) */
+	"INM6X00BRA",		/* (6) */
+	"YY.MM",			/* (7) */
+	"B6",				/* (8) */
 	"#####",		// (9)
 	0x00, 0x00, 0x00,	/* rsv1-3 */
 	{0x00,0x00,0x00,0x00,0x00,0x00},	/* (10) */
@@ -356,11 +356,11 @@ struct inventory_info_t pi_default_cputp =
 	0x01,			/* (18) */
 	0x00,			/* (19) */
 	0x00,			/* (20) */
-	0x0F,			/* (21) */
-	0x05,			/* (22) */
-	0x14,			/* (23) */
-	{0x03,0xC8,0x03,0x9D,0x03,0x38,0x02,0xF6,0x00,0x00},	/* (24) */
-	{0x03,0x04,0x05,0x06,0x07,0x00},						/* (25) */
+	0x00,			/* (21) */
+	0x00,			/* (22) */
+	0x00,			/* (23) */
+	{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},	/* (24) */
+	{0x00,0x00,0x00,0x00,0x00,0x00},						/* (25) */
 	0x02,			/* (26) */
 	0x14,			/* (27) */
 	0x14,			/* (28) */
