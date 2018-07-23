@@ -804,7 +804,7 @@ unsigned long get_board_ddr_clk(void);
 	"uboot=" __stringify(CONFIG_UBOOTPATH) "\0"		\
 	"rcw=" __stringify(CONFIG_RCWPATH) "\0"		\
 	"fmanbin="__stringify(CONFIG_FMANPATH) "\0"	\
-	"bootfrom=ssd\0"	\
+	"bank=1\0"	\
 	"ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"	\
 	"uboot_load=usb start && fatload usb 0:1 0x1000000 /T600/$uboot && "	\
 	"norprotect disable && protect off all && erase 0xEFF40000 0xEFFFFFFF && " \
@@ -816,15 +816,20 @@ unsigned long get_board_ddr_clk(void);
 	"protect off all && erase 0xEFF00000 0xEFF1FFFF && " \
 	"cp.b 0x1000000 0xEFF00000 0x8000\0"	\
 	"consoledev=ttyS0\0"					\
-	"ramdiskaddr=2000000\0"					\
-	"ramdiskfile=/T600/fsl-image-core-t2080rdb-64b.ext2.gz.u-boot\0"			\
-	"fdtaddr=f000000\0"					\
-	"fdtfile=/T600/uImage-t2080rdb.dtb\0"			\
-	"bootfile=/T600/uImage\0"			\
-	"ssdboot=fatload sata 1 $ramdiskaddr $ramdiskfile; "	\
-	"fatload sata 1 $loadaddr $bootfile; fatload sata 1 $fdtaddr $fdtfile;\0"	\
-	"usbboot=usb start; fatload usb 0:1 $ramdiskaddr $ramdiskfile; "	\
-	"fatload usb 0:1 $loadaddr $bootfile; fatload usb 0:1 $fdtaddr $fdtfile;\0" \
+	"ramdiskaddr=0x02000000\0"					\
+	"ramdiskfile=fsl-image-core-t2080rdb-64b.ext2.gz.u-boot\0"			\
+	"fdtaddr=0x0f000000\0"					\
+	"fdtfile=uImage-t2080rdb.dtb\0"			\
+	"bootfile=uImage\0"			\
+	"loadaddr=0x1000000\0"					\
+	"boot1=ext2load sata 1:1 $ramdiskaddr $ramdiskfile; " \
+	"ext2load sata 1:1 $loadaddr $bootfile; ext2load sata 1:1 $fdtaddr $fdtfile\0" \
+	"boot2=ext2load sata 1:2 $ramdiskaddr $ramdiskfile; " \
+	"ext2load sata 1:2 $loadaddr $bootfile; ext2load sata 1:2 $fdtaddr $fdtfile\0" \
+	"diagboot=fatload sata 1 $ramdiskaddr /T600/$ramdiskfile; "	\
+	"fatload sata 1 $loadaddr /T600/$bootfile; fatload sata 1 $fdtaddr /T600/$fdtfile;\0"	\
+	"usbboot=usb start; fatload usb 0:1 $ramdiskaddr /T600/$ramdiskfile; "	\
+	"fatload usb 0:1 $loadaddr /T600/$bootfile; fatload usb 0:1 $fdtaddr /T600/$fdtfile;\0" \
 	"fpgaskip=0\0"	\
 	"bdev=sda3\0"
 
@@ -863,10 +868,10 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_LINUX				\
 	"setenv bootargs root=/dev/ram rw "		\
 	"console=$consoledev,$baudrate $othbootargs;"	\
-	"setenv ramdiskaddr 0x02000000;"		\
-	"setenv fdtaddr 0x0f000000;"			\
-	"setenv loadaddr 0x1000000;"			\
-	"if test ${bootfrom} = ssd; then run ssdboot; else run usbboot; fi; "	\
+	"if test ${bank} = 1; then run boot1; " \
+	"elif test ${bank} = 2; then run boot2; " \
+	"elif test ${bank} = 3; then run usbboot; " \
+	"else run diagboot; fi; "	\
 	"bootm $loadaddr $ramdiskaddr $fdtaddr"
 
 #define CONFIG_HDBOOT					\
