@@ -11,6 +11,9 @@
 #ifndef __T600_H
 #define __T600_H
 
+#define UBOOT_MAJOR_VERSION "01"
+#define UBOOT_MINOR_VERSION "01"
+
 #define CONFIG_SYS_GENERIC_BOARD
 #define CONFIG_DISPLAY_BOARDINFO
 #define CONFIG_T600
