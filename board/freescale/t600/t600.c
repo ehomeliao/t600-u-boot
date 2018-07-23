@@ -18,6 +18,7 @@
 #include <asm/fsl_liodn.h>
 #include <fm_eth.h>
 #include <fs.h>
+#include <usb.h>
 #include "t600.h"
 #include "cpld.h"
 #ifdef CONFIG_CDEC_CPLD
@@ -134,8 +135,8 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 	int len_read;
 #endif
 	int ret;
+	unsigned int bank = 1;
 #if 0
-	unsigned int bank = 0;
 	unsigned int act_bank = 0;
 
 	/* Kernel Start Bank infomation                 */
@@ -205,13 +206,30 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 	}
 #endif
 
-	if (fs_set_blk_dev("sata","1", fstype)){
-		puts("Error Access SATA 1 \n");
-		return RET_ERROR;
+	bank = getenv_ulong("bank", 16, 0x1);
+	if (bank == 1) {
+		/* sda1 with EXT2 */
+		if (fs_set_blk_dev("sata","1:1", 2)){
+			puts("Error Access SATA 1:1 \n");
+			return RET_ERROR;
+		}
+		strcpy(dirname, filename);
+	} else if (bank == 2) {
+		/* sda2 with EXT2 */
+		if (fs_set_blk_dev("sata","1:2", 2)){
+			puts("Error Access SATA 1:2 \n");
+			return RET_ERROR;
+		}
+		strcpy(dirname, filename);
+	} else {
+		/* Diag:\T600 with FAT */
+		if (fs_set_blk_dev("sata","1", 1)){
+			puts("Error Access SATA 1 \n");
+			return RET_ERROR;
+		}
+		strcpy(dirname, "T600/");
+		strcat(dirname, filename);
 	}
-
-	strcpy(dirname, "T600/");
-	strcat(dirname, filename);
 
 	/* FPGA Config File(FP01.bin) Read From SATA 0 to RAM 20000000 */
 	len_read = fs_read(dirname, addr, pos, bytes);
