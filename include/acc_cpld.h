@@ -4,6 +4,8 @@
 #define ACC_CPLD_BUS		0
 #define ACC_CPLD_ADDR	0x60
 
+#define REG_CPLD_VERSION	0x2
+
 #define REG_SYS_STATUS	0x11
 #define EEPROM1_WP				( 1 << 0)
 #define EEPROM2_WP				( 1 << 1)
@@ -15,8 +17,18 @@
 #define BCM5389_BOOT_SPI		( 1 << 0)
 #define BCM5389_SPI_CS			( 1 << 1)
 
+#define REG_SYS_BOOTUP_STATUS2	0x25
+#define WARM_BOOT_RECORD		( 1 << 1)
+
+#define REG_SYS_STATUS2	0x27
+#define MBCNT_LOADED				( 1 << 0)
+
+int get_acc_cpld_version(uint8_t *version);
 int setup_bcm5389(void);
 int acc_eeprom_wp(int primary, int enable);
 int nor_flash_wp(int enable);
+int is_from_warm_boot(void);
+int mbcnt_loaded(int load);
+int is_mbcnt_loaded(void);
 
 #endif /* __ACC_CPLD_H__ */

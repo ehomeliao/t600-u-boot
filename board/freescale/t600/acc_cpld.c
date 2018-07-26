@@ -44,6 +44,20 @@ static int acc_cold_write_mask(uint8_t offset, uint8_t mask, uint8_t value)
 	return ret;
 }
 
+int get_acc_cpld_version(uint8_t *version)
+{
+	int ret = -1;
+
+	if (acc_cpld_read(REG_CPLD_VERSION, version) == 0) {
+		*version = (*version & 0x0f);
+		ret = 0;
+	}
+
+	return ret;
+
+}
+
+
 int setup_bcm5389(void)
 {
 	return acc_cold_write_mask(REG_MGMT_STATUS, BCM5389_BOOT_SPI | BCM5389_SPI_CS, BCM5389_BOOT_SPI | BCM5389_SPI_CS);
@@ -80,3 +94,47 @@ int nor_flash_wp(int enable)
 
 	return acc_cold_write_mask(REG_SYS_STATUS, NOR_FLASH_DISABLE_WP, value);
 }
+
+int is_from_warm_boot(void)
+{
+	uint8_t status;
+	int ret = 0;
+	
+	if (acc_cpld_read(REG_SYS_BOOTUP_STATUS2, &status) == 0) {
+		if (status & WARM_BOOT_RECORD) {
+			ret = 1;
+		}
+	}
+
+	return ret;
+}
+
+
+int mbcnt_loaded(int load)
+{
+	uint8_t value;
+
+	if (load) {
+		value = MBCNT_LOADED;
+	} else {
+		value = 0;
+	}
+
+	return acc_cold_write_mask(REG_SYS_STATUS2, MBCNT_LOADED, value);
+}
+
+
+int is_mbcnt_loaded(void) {
+	uint8_t loaded;
+	int ret = 0;
+	
+	if (acc_cpld_read(REG_SYS_STATUS2, &loaded) == 0) {
+		if (loaded & MBCNT_LOADED) {
+			ret = 1;
+		}
+	}
+
+	return ret;
+}
+
+
