@@ -5,6 +5,10 @@
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
+/* FUJITSU LIMITED
+ * $Date:: 2016-09-12 00:00:00 +0900#$
+*/
+
 #include <common.h>
 
 /* Memory test
@@ -136,6 +140,9 @@
 
 #include <post.h>
 #include <watchdog.h>
+#if defined(CONFIG_T600)
+#include <fsl_ddr_sdram.h>
+#endif
 
 #if CONFIG_POST & (CONFIG_SYS_POST_MEMORY | CONFIG_SYS_POST_MEM_REGIONS)
 
@@ -156,7 +163,381 @@ DECLARE_GLOBAL_DATA_PTR;
 #warning "Injecting address line errors for testing purposes"
 #endif
 
+#if defined(CONFIG_T600)
+#define TEST_PTN_ALL0 0
+#define TEST_PTN_RAN1 1
+#define TEST_PTN_RAN2 2
+#define TEST_PTN_ALLF 3
+#define MEMCLR_OFF    0
+#define MEMCLR_ON     1
+#define TST_START     0
+#define TST_NOW       1
+#define TST_END       2
 
+typedef struct mtp_table_t {
+	unsigned long mtp1;
+	unsigned long mtp2;
+	unsigned long mtp3;
+	unsigned long mtp4;
+	unsigned long mtp5;
+	unsigned long mtp6;
+	unsigned long mtp7;
+	unsigned long mtp8;
+	unsigned long mtp9;
+	unsigned long mtp10;
+} mtp_table_t;
+
+
+/*****************************************************************/ 
+/** 
+ * 
+ * @brief memory_hwtest
+ * @brief This function tests the memory of DDR by using P2041 CCSR.
+ * 
+ * @param ptn     test patn                  0:All 0/1:Randam1/2:Randam2/3:ALL F
+ * @param tst_end test messag control flag   0:Test Start 1:Test Now 2:Test End
+ * @param memclr  memory claer control flag  0:Not memoru clear 1:Do memory clear
+ * @retval 0 Normal end
+ * @retval 1 Fail end
+ * 
+ * @attention --
+ * 
+ * ------------------------------------------------------------ 
+ * SPDX-License-Identifier:	GPL-2.0+
+ * This program is free software: you can redistribute it and/or modify
+ * it un under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * COPYRIGHT(C) FUJITSU LIMITED 2015
+ */
+/*****************************************************************/ 
+static int memory_hwtest(unsigned int ptn,unsigned tst_end,unsigned int memclr)
+{
+	struct ccsr_ddr __iomem *io_ddr = (void *)CONFIG_SYS_FSL_DDR_ADDR;
+	unsigned long ret = 0;
+	unsigned long reg = 0;
+	unsigned long reg1 = 0;
+	unsigned long err_detect = 0;
+	unsigned long err_sbe = 0;
+	unsigned long dump_addr;
+#ifdef DEBUG_T600_MEMTEST
+	unsigned long dump_addr1;
+#endif
+	unsigned long i,j;
+	unsigned long idx = ptn;
+	mtp_table_t mtp_data[4] = {
+		{	/* ALL 0 PTN */
+			0x00000000,0x00000000,0x00000000,0x00000000,
+			0x00000000,0x00000000,0x00000000,0x00000000,
+			0x00000000,0x00000000
+		},
+		{	/* ramdam1 PTN */	
+			0xa5a5a5a5,0x5a5a5a5a,0x00000000,0xffffffff,
+			0x01234567,0x89abcdef,0xfedcba98,0x76543210,
+			0xffffffff,0x00000000
+		},
+		{	/* ramdam2 PTN */	
+			0x5a5a5a5a,0xa5a5a5a5,0xffffffff,0x00000000,
+			0xfedcba98,0x76543210,0x01234567,0x89abcdef,
+			0x00000000,0xffffffff
+		},
+		{	/* ALL F PTN */	
+			0xffffffff,0xffffffff,0xffffffff,0xffffffff,
+			0xffffffff,0xffffffff,0xffffffff,0xffffffff,
+			0xffffffff,0xffffffff
+		}
+	};
+	
+#ifdef DEBUG_T600_MEMTEST
+	printf("#Set D_INIT before MEM_EN\n");
+	printf("#Set MEM_EN\n");
+	dump_addr1 = (unsigned long)(unsigned long)&(io_ddr->sdram_cfg);
+	printf("-------------------------------------------------\n");
+	for (j = 0; j < 0x10; j += 16) {
+		printf(" %08x", (unsigned int)dump_addr1);
+		for (i = 0; i < 4; i++) {
+			printf(" %08x", (unsigned int)in_be32((void *)dump_addr1));
+			dump_addr1 += 4;
+		}
+		printf("\n");
+	}
+#endif
+
+#if defined(DEBUG_T600_MEMTESTI)
+	printf("DDR TEST: Hardware Test Function...\n");
+#else
+	if(TST_START==tst_end) printf("DDR TEST: Hardware Test Function...");
+#endif
+
+	/* Set MEM_HALT=1 and delay 1ms */
+	reg1 = in_be32(&io_ddr->sdram_cfg);
+	reg1 = (reg1 | 0x00000002);
+	out_be32(&io_ddr->sdram_cfg, reg1);
+	udelay(1000);
+	asm volatile("sync;isync");
+	
+#ifdef DEBUG_T600_MEMTEST
+	printf("#Set MEM_HALT=1 and delay 1ms \n");
+#endif
+	
+	/* Set MTP1-10 test pattern registers */
+	out_be32(&io_ddr->err_disable, 0x0);
+	out_be32(&io_ddr->mtp1, mtp_data[idx].mtp1);
+	out_be32(&io_ddr->mtp2, mtp_data[idx].mtp2);
+	out_be32(&io_ddr->mtp3, mtp_data[idx].mtp3);
+	out_be32(&io_ddr->mtp4, mtp_data[idx].mtp4);
+	out_be32(&io_ddr->mtp5, mtp_data[idx].mtp5);
+	out_be32(&io_ddr->mtp6, mtp_data[idx].mtp6);
+	out_be32(&io_ddr->mtp7, mtp_data[idx].mtp7);
+	out_be32(&io_ddr->mtp8, mtp_data[idx].mtp8);
+	out_be32(&io_ddr->mtp9, mtp_data[idx].mtp9);
+	out_be32(&io_ddr->mtp10, mtp_data[idx].mtp10);
+	udelay(200);
+	asm volatile("sync;isync");
+	
+#ifdef DEBUG_T600_MEMTEST
+	printf("#Set MTP1-10 test pattern registers \n");
+#endif
+
+	/* Set MT_EN =1 : Start toriger */
+	out_be32(&io_ddr->mtcr, 0x80000000);
+	udelay(200);
+	asm volatile("sync;isync");
+	
+#ifdef DEBUG_T600_MEMTEST
+	printf("#Set MT_EN =1\n");
+#endif
+
+#ifdef DEBUG_T600_MEMTEST
+	printf("sdram_cfg 0x%08x \n",(unsigned int)in_be32(&io_ddr->sdram_cfg));
+	dump_addr1 = (unsigned long)(unsigned long)&(io_ddr->mtcr);
+	printf("-------------------------------------------------\n");
+	for (j = 0; j < 0x100; j += 16) {
+		printf(" %08x", (unsigned int)dump_addr1);
+		for (i = 0; i < 4; i++) {
+			printf(" %08x", (unsigned int)in_be32((void *)dump_addr1));
+			dump_addr1 += 4;
+		}
+		printf("\n");
+	}
+#endif
+
+	/* Set MEM_HALT=0 and delay 1ms */
+	reg1 = in_be32(&io_ddr->sdram_cfg);
+	reg1 = (reg1 & 0xfffffffd);
+	out_be32(&io_ddr->sdram_cfg, reg1);
+	udelay(1000);
+	asm volatile("sync;isync");
+	
+#ifdef DEBUG_T600_MEMTEST
+	printf("#Set MEM_HALT=0 and delay 1ms \n");
+#endif	
+	
+	/* Poll MT_EN to clear */
+#ifdef DEBUG_T600_MEMTEST
+	printf("#Start Poll MT_EN to clear \n");
+#endif
+	do {
+		reg = in_be32(&io_ddr->mtcr);
+	}while((reg >> 31) != 0);
+#ifdef DEBUG_T600_MEMTEST
+	printf("#End Poll MT_EN to clear \n");
+#endif
+	
+	
+#ifdef DEBUG_T600_MEMTEST
+	printf("&io_ddr->mtcr[0x%08x]:0x%08x \n",(unsigned int)&io_ddr->mtcr,(unsigned int)reg);
+	
+	if(0 == ptn) {
+		dump_addr1 = (unsigned long)0x10000000;
+	} else if(1 == ptn) {
+		dump_addr1 = (unsigned long)0x20000000;
+	} else if(2 == ptn) {
+		dump_addr1 = (unsigned long)0x30000000;
+	} else if(3 == ptn) {
+		dump_addr1 = (unsigned long)0x40000000;
+	} else if(4 == ptn) {
+		dump_addr1 = (unsigned long)0x50000000;
+	} else {
+		dump_addr1 = (unsigned long)0x10000000;
+	}
+	
+	printf("-------------------------------------------------\n");
+	for (j = 0; j < 0x30; j += 16) {
+		printf(" %08x", (unsigned int)dump_addr1);
+		for (i = 0; i < 4; i++) {
+			printf(" %08x", (unsigned int)in_be32((void *)dump_addr1));
+			dump_addr1 += 4;
+		}
+		printf("\n");
+	}
+#endif
+	
+	/* Error result Chack */
+	err_detect = in_be32(&io_ddr->err_detect);
+	err_sbe = in_be32(&io_ddr->err_sbe);
+	if ((err_detect) || (err_sbe)) {
+		printf("NG\n");
+		ret = 1;
+		dump_addr = (unsigned long)&(io_ddr->data_err_inject_hi);
+		printf(" Address  +00      +04      +08      +0C     \n");
+		printf("-------------------------------------------------\n");
+		for (j = 0; j < 0x100; j += 16) {
+			printf(" %08x", (unsigned int)dump_addr);
+			for (i = 0; i < 4; i++) {
+				printf(" %08x", (unsigned int)in_be32((void *)dump_addr));
+				dump_addr += 4;
+			}
+			printf("\n");
+		}
+	} else if(reg & 0x1) {
+		printf("COMPRER FULT\n");
+		ret = 0;
+		
+		dump_addr = (unsigned long)&(io_ddr->data_err_inject_hi);
+		printf(" Address  +00      +04      +08      +0C     \n");
+		printf("-------------------------------------------------\n");
+		for (j = 0; j < 0x100; j += 16) {
+			printf(" %08x", (unsigned int)dump_addr);
+			for (i = 0; i < 4; i++) {
+				printf(" %08x", (unsigned int)in_be32((void *)dump_addr));
+				dump_addr += 4;
+			}
+			printf("\n");
+		}
+		
+		if (1 == memclr) {
+			printf("DDR ALL CLEAR...\n");
+			/* Set MEM_HALT=1 and delay 1ms */
+			reg1 = in_be32(&io_ddr->sdram_cfg);
+			reg1 = (reg1 | 0x00000002);
+			out_be32(&io_ddr->sdram_cfg, reg1);
+			udelay(1000);
+			asm volatile("sync;isync");
+			
+			/* Set MTP1-10 test pattern registers */
+			out_be32(&io_ddr->mtp1, 0x0);
+			out_be32(&io_ddr->mtp2, 0x0);
+			out_be32(&io_ddr->mtp3, 0x0);
+			out_be32(&io_ddr->mtp4, 0x0);
+			out_be32(&io_ddr->mtp5, 0x0);
+			out_be32(&io_ddr->mtp6, 0x0);
+			out_be32(&io_ddr->mtp7, 0x0);
+			out_be32(&io_ddr->mtp8, 0x0);
+			out_be32(&io_ddr->mtp9, 0x0);
+			out_be32(&io_ddr->mtp10, 0x0);
+			udelay(200);
+			asm volatile("sync;isync");
+			
+			
+			/* Set MT_EN =1 : Start toriger */
+			out_be32(&io_ddr->mtcr, 0x81000000);
+			udelay(200);
+			asm volatile("sync;isync");
+			
+			/* Set MEM_HALT=0 and delay 1ms */
+			reg1 = in_be32(&io_ddr->sdram_cfg);
+			reg1 = (reg1 & 0xfffffffd);
+			out_be32(&io_ddr->sdram_cfg, reg1);
+			udelay(1000);
+			asm volatile("sync;isync");
+			
+			do {
+				reg = in_be32(&io_ddr->mtcr);
+			}while((reg >> 31) != 0);
+		
+#if 0
+			/* Error Clear */
+			out_be32(&io_ddr->data_err_inject_hi, 0x0);
+			out_be32(&io_ddr->data_err_inject_lo, 0x0);
+			out_be32(&io_ddr->ecc_err_inject, 0x0);
+			out_be32(&io_ddr->capture_data_hi, 0x0);
+			out_be32(&io_ddr->capture_data_lo, 0x0);
+			out_be32(&io_ddr->capture_ecc, 0x0);
+			out_be32(&io_ddr->err_detect, 0x0);
+			out_be32(&io_ddr->err_disable, 0x0);
+			out_be32(&io_ddr->capture_attributes, 0x0);
+			out_be32(&io_ddr->capture_address, 0x0);
+			out_be32(&io_ddr->capture_ext_address, 0x0);
+			out_be32(&io_ddr->err_sbe, 0x0);
+			udelay(200);
+			asm volatile("sync;isync");
+#endif
+
+			printf("OK\n");
+		}
+		
+	} else {
+		if(TST_END==tst_end) printf("OK\n");
+		ret = 0;
+		
+		if (1 == memclr) {
+			printf("DDR ALL CLEAR...");
+			/* Set MEM_HALT=1 and delay 1ms */
+			reg1 = in_be32(&io_ddr->sdram_cfg);
+			reg1 = (reg1 | 0x00000002);
+			out_be32(&io_ddr->sdram_cfg, reg1);
+			udelay(1000);
+			asm volatile("sync;isync");
+			
+			/* Set MTP1-10 test pattern registers */
+			out_be32(&io_ddr->mtp1, 0x0);
+			out_be32(&io_ddr->mtp2, 0x0);
+			out_be32(&io_ddr->mtp3, 0x0);
+			out_be32(&io_ddr->mtp4, 0x0);
+			out_be32(&io_ddr->mtp5, 0x0);
+			out_be32(&io_ddr->mtp6, 0x0);
+			out_be32(&io_ddr->mtp7, 0x0);
+			out_be32(&io_ddr->mtp8, 0x0);
+			out_be32(&io_ddr->mtp9, 0x0);
+			out_be32(&io_ddr->mtp10, 0x0);
+			udelay(200);
+			asm volatile("sync;isync");
+			
+			/* Set MT_EN =1 : Start toriger */
+			out_be32(&io_ddr->mtcr, 0x81000000);
+			udelay(200);
+			asm volatile("sync;isync");
+			
+			/* Set MEM_HALT=0 and delay 1ms */
+			reg1 = in_be32(&io_ddr->sdram_cfg);
+			reg1 = (reg1 & 0xfffffffd);
+			out_be32(&io_ddr->sdram_cfg, reg1);
+			udelay(1000);
+			asm volatile("sync;isync");
+
+			do {
+				reg = in_be32(&io_ddr->mtcr);
+			}while((reg >> 31) != 0);
+			
+			printf("OK\n");
+		}
+		
+		/* Error Clear */
+		out_be32(&io_ddr->data_err_inject_hi, 0x0);
+		out_be32(&io_ddr->data_err_inject_lo, 0x0);
+		out_be32(&io_ddr->ecc_err_inject, 0x0);
+		out_be32(&io_ddr->capture_data_hi, 0x0);
+		out_be32(&io_ddr->capture_data_lo, 0x0);
+		out_be32(&io_ddr->capture_ecc, 0x0);
+		out_be32(&io_ddr->err_detect, 0x0);
+		out_be32(&io_ddr->err_disable, 0x0);
+		out_be32(&io_ddr->capture_attributes, 0x0);
+		out_be32(&io_ddr->capture_address, 0x0);
+		out_be32(&io_ddr->capture_ext_address, 0x0);
+		out_be32(&io_ddr->err_sbe, 0x0);
+		udelay(200);
+		asm volatile("sync;isync");
+		
+	}
+
+	return ret;
+}
+
+
+#endif
+
+#ifndef CONFIG_T600
 /*
  * This function performs a double word move from the data at
  * the source pointer to the location at the destination pointer.
@@ -470,6 +851,7 @@ static int memory_post_tests(unsigned long start, unsigned long size)
 
 	return ret;
 }
+#endif
 
 /*
  * !! this is only valid, if you have contiguous memory banks !!
@@ -508,6 +890,7 @@ void arch_memory_failure_handle(void)
 	return;
 }
 
+#ifndef CONFIG_T600
 int memory_regions_post_test(int flags)
 {
 	int ret = 0;
@@ -522,6 +905,7 @@ int memory_regions_post_test(int flags)
 
 	return ret;
 }
+#endif
 
 int memory_post_test(int flags)
 {
@@ -530,7 +914,17 @@ int memory_post_test(int flags)
 	u32 memsize, vstart;
 
 	arch_memory_test_prepare(&vstart, &memsize, &phys_offset);
-
+	
+#if defined(CONFIG_T600)
+	ret = memory_hwtest(TEST_PTN_RAN1,TST_START,MEMCLR_OFF);
+	if (0 == ret) {
+		ret = memory_hwtest(TEST_PTN_RAN2,TST_NOW,MEMCLR_OFF);
+		if (0 == ret) {
+			ret = memory_hwtest(TEST_PTN_ALLF,TST_END,MEMCLR_ON);
+		}
+	}
+	
+#else
 	do {
 		if (flags & POST_SLOWTEST) {
 			ret = memory_post_tests(vstart, memsize);
@@ -539,6 +933,7 @@ int memory_post_test(int flags)
 		}
 	} while (!ret &&
 		!arch_memory_test_advance(&vstart, &memsize, &phys_offset));
+#endif
 
 	arch_memory_test_cleanup(&vstart, &memsize, &phys_offset);
 	if (ret)

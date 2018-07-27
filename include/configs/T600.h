@@ -19,6 +19,8 @@
 #define CONFIG_T600
 #define CONFIG_CDEC_CPLD
 
+#define CONFIG_POST	CONFIG_SYS_POST_MEMORY   /* test POST memory test */
+
 #define CONFIG_ICS307_REFCLK_HZ 25000000  /* ICS307 ref clk freq */
 /* define CONFIG_MMC */
 #define CONFIG_SPI_FLASH
