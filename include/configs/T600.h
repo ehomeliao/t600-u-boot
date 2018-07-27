@@ -810,6 +810,9 @@ unsigned long get_board_ddr_clk(void);
 	"rcw=" __stringify(CONFIG_RCWPATH) "\0"		\
 	"fmanbin="__stringify(CONFIG_FMANPATH) "\0"	\
 	"bank=1\0"	\
+	"boot1_arg=setenv ramdiskaddr -; setenv bootargs root=/dev/sda1 rw console=$consoledev,$baudrate $othbootargs\0"	\
+	"boot2_arg=setenv ramdiskaddr -; setenv bootargs root=/dev/sda2 rw console=$consoledev,$baudrate $othbootargs\0"	\
+	"bootr_arg=setenv ramdiskaddr 0x02000000; setenv bootargs root=/dev/ram rw console=$consoledev,$baudrate $othbootargs\0"	\
 	"ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"	\
 	"uboot_load=usb start && fatload usb 0:1 0x1000000 /T600/$uboot && "	\
 	"norprotect disable && protect off all && erase 0xEFF40000 0xEFFFFFFF && " \
@@ -827,13 +830,12 @@ unsigned long get_board_ddr_clk(void);
 	"fdtfile=uImage-t2080rdb.dtb\0"			\
 	"bootfile=uImage\0"			\
 	"loadaddr=0x1000000\0"					\
-	"boot1=ext2load sata 1:1 $ramdiskaddr $ramdiskfile; " \
-	"ext2load sata 1:1 $loadaddr $bootfile; ext2load sata 1:1 $fdtaddr $fdtfile\0" \
-	"boot2=ext2load sata 1:2 $ramdiskaddr $ramdiskfile; " \
+	"boot1=run boot1_arg; ext2load sata 1:1 $loadaddr $bootfile; ext2load sata 1:1 $fdtaddr $fdtfile\0" \
+	"boot2=run boot2_arg; ext2load sata 1:1 $loadaddr $bootfile; ext2load sata 1:1 $fdtaddr $fdtfile\0" \
 	"ext2load sata 1:2 $loadaddr $bootfile; ext2load sata 1:2 $fdtaddr $fdtfile\0" \
-	"diagboot=fatload sata 1 $ramdiskaddr /T600/$ramdiskfile; "	\
+	"diagboot=run bootr_arg; fatload sata 1 $ramdiskaddr /T600/$ramdiskfile; "	\
 	"fatload sata 1 $loadaddr /T600/$bootfile; fatload sata 1 $fdtaddr /T600/$fdtfile;\0"	\
-	"usbboot=usb start; fatload usb 0:1 $ramdiskaddr /T600/$ramdiskfile; "	\
+	"usbboot=run bootr_arg; usb start; fatload usb 0:1 $ramdiskaddr /T600/$ramdiskfile; "	\
 	"fatload usb 0:1 $loadaddr /T600/$bootfile; fatload usb 0:1 $fdtaddr /T600/$fdtfile;\0" \
 	"fpgaskip=0\0"	\
 	"bdev=sda3\0"
@@ -871,8 +873,6 @@ unsigned long get_board_ddr_clk(void);
 	"go 0x01000000"
 
 #define CONFIG_LINUX				\
-	"setenv bootargs root=/dev/ram rw "		\
-	"console=$consoledev,$baudrate $othbootargs;"	\
 	"if test ${bank} = 1; then run boot1; " \
 	"elif test ${bank} = 2; then run boot2; " \
 	"elif test ${bank} = 3; then run usbboot; " \
