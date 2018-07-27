@@ -50,5 +50,6 @@
 
 #define msleep(a)    udelay(a * 1000)
 
+int cdec_cpld_preinit(void);
 int fpga_config_main(unsigned int fpga, unsigned int mode,unsigned int size);
 int cdec_cpld_init(void);

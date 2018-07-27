@@ -173,6 +173,8 @@ int cdec_cpld_preinit(void)
 	/* Turn off ALM LED */
 	SEVERITY_LED = SEVERITY_LED_OFF;
 
+	return 0;
+
 }
 
 int cdec_cpld_init(void)

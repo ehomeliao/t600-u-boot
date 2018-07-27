@@ -19,8 +19,8 @@
 #include <fm_eth.h>
 #include <fs.h>
 #include <usb.h>
+#include <acc_cpld.h>
 #include "t600.h"
-#include "cpld.h"
 #ifdef CONFIG_CDEC_CPLD
 #include "cdec_cpld.h"
 #endif
@@ -44,7 +44,13 @@ int checkboard(void)
 static int  bord_fpga_config_reset_skip_jadge(void)
 {
 
-	/* TODO: check CPU reset instead of BMCNT PCIE present */
+	if (is_from_warm_boot() && is_mbcnt_loaded()) {
+		return 1;
+	} else {
+		return 0;
+	}
+
+#if 0
 	pci_dev_t dev;
 	dev = pci_find_device (MBCNT_VENDER_ID, MBCNT_DEVICE_ID, 0);
 	if (dev == -1) {
@@ -52,6 +58,7 @@ static int  bord_fpga_config_reset_skip_jadge(void)
 	}
 	printf(" MBCNT BAR0=0x%x\n", (uint32_t)pci_map_bar(dev, PCI_BASE_ADDRESS_0, PCI_REGION_MEM));
 	return 1;
+#endif
 }
 
 static int board_abortfpgaconf(int configdelay)
@@ -342,6 +349,8 @@ static int bord_fpga_config_sata(unsigned int fpga_n,unsigned int config_side)
 		break;
 	case RET_SUCCESS:
 		printf("FPGA#%01d Configured...Side%01d \n",fpga_n,config_side);
+		/* Record to CPLD as MBCNT is loaded */
+		mbcnt_loaded(1);
 #if 0
 		if(0 == config_side) {
 			setenv("fpgmode", "1");
@@ -390,14 +399,14 @@ void bord_fpga_config(void)
 		return;
 	}
 	
-	/* Chack FPGA Config SKIP ,When User Operationt */
+	/* Check FPGA Config SKIP ,When User Operationt */
 	if (1 == bord_fpga_config_user_skip_jadge()) {
 		return ;
 	}
 	
-	/* Chack FPGA Config SKIP ,When CPU Reset */
+	/* Check FPGA Config SKIP ,When CPU Reset */
 	if(1 == bord_fpga_config_reset_skip_jadge()) {
-		printf("SKIP FPGA Config since it is present\n");
+		printf("SKIP FPGA Config since it is loaded\n");
 		return ;
 	}
 
