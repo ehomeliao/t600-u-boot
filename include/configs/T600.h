@@ -816,7 +816,7 @@ unsigned long get_board_ddr_clk(void);
 	"cp.b 0x1000000 0xEFF40000 0xC0000 && norprotect enable\0"			\
 	"rcw_load=usb start && fatload usb 0:1 0x1000000 /T600/$rcw && "	\
 	"protect off all && erase 0xEF000000 0xEF01FFFF && " \
-	"cp.b 0x1000000 0xEF000000 0x50\0"	\
+	"cp.b 0x1000000 0xEF000000 $filesize\0"	\
 	"fman_load=usb start && fatload usb 0:1 0x1000000 /T600/$fmanbin && "	\
 	"protect off all && erase 0xEFF00000 0xEFF1FFFF && " \
 	"cp.b 0x1000000 0xEFF00000 0x8000\0"	\
