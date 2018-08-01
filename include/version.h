@@ -18,12 +18,8 @@
 #define CONFIG_IDENT_STRING ""
 #endif
 
-#ifdef UBOOT_MAJOR_VERSION
-#define U_BOOT_VERSION_STRING "BOOT-MV"UBOOT_MAJOR_VERSION"V"UBOOT_MINOR_VERSION
-#else
 #define U_BOOT_VERSION_STRING U_BOOT_VERSION " (" U_BOOT_DATE " - " \
-	U_BOOT_TIME ")" CONFIG_IDENT_STRING
-#endif
+     U_BOOT_TIME ")" CONFIG_IDENT_STRING
 
 #ifndef __ASSEMBLY__
 extern const char version_string[];
