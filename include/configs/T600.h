@@ -830,6 +830,7 @@ unsigned long get_board_ddr_clk(void);
 	"fman_load=usb start && fatload usb 0:1 0x1000000 /T600/$fmanbin && "	\
 	"protect off all && erase 0xEFF00000 0xEFF1FFFF && " \
 	"cp.b 0x1000000 0xEFF00000 0x8000\0"	\
+	"clearenv=protect off all && erase 0xEFF20000 0xEFF3FFFF\0"	\
 	"consoledev=ttyS0\0"					\
 	"ramdiskaddr=0x02000000\0"					\
 	"ramdiskfile=fsl-image-core-t2080rdb-64b.ext2.gz.u-boot\0"			\
