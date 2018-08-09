@@ -835,12 +835,11 @@ unsigned long get_board_ddr_clk(void);
 	"ramdiskaddr=0x02000000\0"					\
 	"ramdiskfile=fsl-image-core-t2080rdb-64b.ext2.gz.u-boot\0"			\
 	"fdtaddr=0x0f000000\0"					\
-	"fdtfile=uImage-t2080rdb.dtb\0"			\
-	"bootfile=uImage\0"			\
+	"fdtfile=uImage-t600.dtb\0"			\
+	"bootfile=uImage-t600.bin\0"			\
 	"loadaddr=0x1000000\0"					\
-	"boot1=run boot1_arg; ext2load sata 1:1 $loadaddr $bootfile; ext2load sata 1:1 $fdtaddr $fdtfile\0" \
-	"boot2=run boot2_arg; ext2load sata 1:1 $loadaddr $bootfile; ext2load sata 1:1 $fdtaddr $fdtfile\0" \
-	"ext2load sata 1:2 $loadaddr $bootfile; ext2load sata 1:2 $fdtaddr $fdtfile\0" \
+	"boot1=run boot1_arg; ext2load sata 1:5 $loadaddr $bootfile; ext2load sata 1:5 $fdtaddr $fdtfile\0" \
+	"boot2=run boot2_arg; ext2load sata 1:6 $loadaddr $bootfile; ext2load sata 1:6 $fdtaddr $fdtfile\0" \
 	"diagboot=run bootr_arg; fatload sata 1 $ramdiskaddr /T600/$ramdiskfile; "	\
 	"fatload sata 1 $loadaddr /T600/$bootfile; fatload sata 1 $fdtaddr /T600/$fdtfile;\0"	\
 	"usbboot=run bootr_arg; usb start; fatload usb 0:1 $ramdiskaddr /T600/$ramdiskfile; "	\
