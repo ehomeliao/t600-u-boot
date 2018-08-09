@@ -424,6 +424,7 @@ int initr_sata(void)
 {
 	puts("SATA:  ");
 	sata_initialize();
+	puts("\n");
 }
 #endif
 

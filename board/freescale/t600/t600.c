@@ -238,10 +238,28 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 		} else {
 			strcpy(dirname, filename);
 		}
+	} else if (bank == 3) {
+		usb_stop();
+		printf("(Re)start USB...\n");
+		if (usb_init() >= 0) {
+#ifdef CONFIG_USB_STORAGE
+			/* try to recognize storage devices immediately */
+			usb_stor_scan(1);
+#endif
+			/* USB:/T600 FAT */
+			if (fs_set_blk_dev("usb","0:1", 1)){
+				puts("Error Access usb 0:1 (FAT)\n");
+				return RET_ERROR;
+			}
+			strcpy(dirname, "T600/");
+			strcat(dirname, filename);
+		} else {
+			puts("Error to start USB\n");
+		}
 	} else {
 		/* Diag:\T600 with FAT */
 		if (fs_set_blk_dev("sata","1", 1)){
-			puts("Error Access SATA 1 \n");
+			puts("Error Access SATA 1 (FAT) \n");
 			return RET_ERROR;
 		}
 		strcpy(dirname, "T600/");
@@ -259,7 +277,7 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 			printf("Error Read File(%s) From SATA 0:%01d \n",dirname,act_bank+1);
 		}
 #else
-		printf("Error Read File(%s) From SATA 1\n",dirname);
+		printf("Error Read MBCNT File(%s)n",dirname);
 #endif
 		return RET_RERY;
 	}
