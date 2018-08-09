@@ -143,6 +143,8 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 #endif
 	int ret;
 	unsigned int bank = 1;
+	int len;
+	char *mbcntdir = getenv("mbcntdir");
 #if 0
 	unsigned int act_bank = 0;
 
@@ -216,18 +218,26 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 	bank = getenv_ulong("bank", 16, 0x1);
 	if (bank == 1) {
 		/* sda1 with EXT2 */
-		if (fs_set_blk_dev("sata","1:1", 2)){
-			puts("Error Access SATA 1:1 \n");
+		if (fs_set_blk_dev("sata","1:5", 2)){
+			puts("Error Access SATA 1:5 \n");
 			return RET_ERROR;
 		}
-		strcpy(dirname, filename);
+		if (mbcntdir != NULL) {
+			len = snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
+		} else {
+			strcpy(dirname, filename);
+		}
 	} else if (bank == 2) {
 		/* sda2 with EXT2 */
-		if (fs_set_blk_dev("sata","1:2", 2)){
-			puts("Error Access SATA 1:2 \n");
+		if (fs_set_blk_dev("sata","1:6", 2)){
+			puts("Error Access SATA 1:6 \n");
 			return RET_ERROR;
 		}
-		strcpy(dirname, filename);
+		if (mbcntdir != NULL) {
+			len = snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
+		} else {
+			strcpy(dirname, filename);
+		}
 	} else {
 		/* Diag:\T600 with FAT */
 		if (fs_set_blk_dev("sata","1", 1)){

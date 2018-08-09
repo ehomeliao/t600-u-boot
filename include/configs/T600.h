@@ -845,7 +845,8 @@ unsigned long get_board_ddr_clk(void);
 	"usbboot=run bootr_arg; usb start; fatload usb 0:1 $ramdiskaddr /T600/$ramdiskfile; "	\
 	"fatload usb 0:1 $loadaddr /T600/$bootfile; fatload usb 0:1 $fdtaddr /T600/$fdtfile;\0" \
 	"fpgaskip=0\0"	\
-	"bdev=sda3\0"
+	"bdev=sda3\0" \
+	"mbcntdir=ucnt\0"
 
 /*
  * For emulation this causes u-boot to jump to the start of the
