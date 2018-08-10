@@ -27,6 +27,8 @@
 #define CONFIG_CDEC_CPLD
 
 #define CONFIG_POST	CONFIG_SYS_POST_MEMORY   /* test POST memory test */
+#define CONFIG_BOOTCOUNT_LIMIT
+#define CONFIG_BOOTCOUNT_ENV
 
 #define CONFIG_ICS307_REFCLK_HZ 25000000  /* ICS307 ref clk freq */
 /* define CONFIG_MMC */
@@ -846,7 +848,12 @@ unsigned long get_board_ddr_clk(void);
 	"fatload usb 0:1 $loadaddr /T600/$bootfile; fatload usb 0:1 $fdtaddr /T600/$fdtfile;\0" \
 	"fpgaskip=0\0"	\
 	"bdev=sda3\0" \
-	"mbcntdir=ucnt\0"
+	"mbcntdir=ucnt\0" \
+	"bootlimit=10\0" \
+	"upgrade_available=0\0" \
+	"altbootcmd=if test ${bank} = 1; then run boot2; elif test ${bank} = 2; then run boot1; " \
+	"elif test ${bank} = 3; then run usbboot; else run diagboot; fi; "	\
+	"bootm $loadaddr $ramdiskaddr $fdtaddr;\0"
 
 /*
  * For emulation this causes u-boot to jump to the start of the
