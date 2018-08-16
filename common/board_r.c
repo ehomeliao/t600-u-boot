@@ -55,6 +55,9 @@
 #include <dm/root.h>
 #include <linux/compiler.h>
 #include <linux/err.h>
+#if defined(CONFIG_CMD_SATA) && defined(CONFIG_FSL_SATA) && defined(CONFIG_INIT_SATA)
+#include <sata.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -425,6 +428,7 @@ int initr_sata(void)
 	puts("SATA:  ");
 	sata_initialize();
 	puts("\n");
+	return 0;
 }
 #endif
 
