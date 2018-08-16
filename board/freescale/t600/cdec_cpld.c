@@ -188,6 +188,12 @@ int cdec_cpld_init(void)
 	msleep(1000);
 
 	/* PIU Reset Release */
+	PIU_RESET = 0x30000;
+
+	/* Wait 1000ms */
+	msleep(1000);
+
+	/* PIU PCIE Release */
 	PIU_RESET = 0x0;
 
 	/* MBCNT Reset Release */

@@ -42,7 +42,6 @@
 #define PIU_PWR_CTRL				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa00400))
 #define PIU_ALM_FORCE			(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa0051c))
 #define PIU_ALM_MASK				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa0053c))
-#define PIU_PWR_CTRL				(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0xa00400))
 #define TX_DIS						(*(volatile unsigned long int *)(CDEC_CPLD_BASE + 0x1900004))
 
 #define MBCNT_VENDER_ID			0x10cf
