@@ -143,6 +143,7 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 #endif
 	int ret;
 	unsigned int bank = 1;
+	unsigned int fpga_usb = 0;
 	int len;
 	char *mbcntdir = getenv("mbcntdir");
 #if 0
@@ -216,7 +217,29 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 #endif
 
 	bank = getenv_ulong("bank", 16, 0x1);
-	if (bank == 1) {
+	fpga_usb = getenv_ulong("fpga_usb", 16, 0x1);
+	if (fpga_usb == 1) {
+		usb_stop();
+		printf("(Re)start USB...\n");
+		if (usb_init() >= 0) {
+#ifdef CONFIG_USB_STORAGE
+			/* try to recognize storage devices immediately */
+			usb_stor_scan(1);
+#endif
+			/* USB:/T600 FAT */
+			if (fs_set_blk_dev("usb","0:1", 1)){
+				puts("Error Access usb 0:1 (FAT)\n");
+				return RET_ERROR;
+			}
+			if (mbcntdir != NULL) {
+				len = snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
+			} else {
+				strcpy(dirname, filename);
+			}
+		} else {
+			puts("Error to start USB\n");
+		}
+	} else if (bank == 1) {
 		/* sda1 with EXT2 */
 		if (fs_set_blk_dev("sata","1:5", 2)){
 			puts("Error Access SATA 1:5 \n");
