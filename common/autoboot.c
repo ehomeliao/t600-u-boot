@@ -11,6 +11,9 @@
 #include <fdtdec.h>
 #include <menu.h>
 #include <post.h>
+#ifdef CONFIG_T600
+#include <watchdog.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -286,6 +289,9 @@ void autoboot_command(const char *s)
 		int prev = disable_ctrlc(1);	/* disable Control C checking */
 #endif
 
+#if defined(CONFIG_T600) && defined(CONFIG_WATCHDOG)
+		init_watchdog_kernel();
+#endif
 		run_command_list(s, -1, 0);
 
 #if defined(CONFIG_AUTOBOOT_KEYED) && !defined(CONFIG_AUTOBOOT_KEYED_CTRLC)

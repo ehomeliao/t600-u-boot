@@ -310,6 +310,59 @@ __weak unsigned long get_tbclk (void)
 
 
 #if defined(CONFIG_WATCHDOG)
+
+#define WATCHDOG_MASK (TCR_WP(1) | TCR_WRC(3) | TCR_WIE)
+
+void
+mpc85xx_wdt_status(void)
+{
+	unsigned long val1, val2;
+
+	val1 = mfspr(SPRN_TCR);
+	val2 = mfspr(SPRN_TSR);
+
+	printf("SPRN_TCR = 0x%lu\n", val1);
+	printf("SPRN_TSR = 0x%lu\n", val2);
+}
+
+void
+stop_85xx_watchdog(void)
+{
+	mtspr(SPRN_TCR, (mfspr(SPRN_TCR) & ~WATCHDOG_MASK));
+}
+
+void
+init_85xx_watchdog_kernel(void)
+{
+	ulong wdt_enable;
+
+	wdt_enable = getenv_ulong("wdt_enable", 16, 0);
+
+	if (wdt_enable ) {
+		/* timeout: about 100~120 sec */
+		mtspr(SPRN_TCR, (mfspr(SPRN_TCR) & ~WATCHDOG_MASK) |
+		      TCR_WP(31) | TCR_WRC(CONFIG_WATCHDOG_RC));
+	} else {
+		stop_85xx_watchdog();
+	}
+}
+
+void
+init_85xx_watchdog(void)
+{
+
+	ulong wdt_enable;
+
+	wdt_enable = getenv_ulong("wdt_enable", 16, 0);
+
+	if (wdt_enable ) {
+		mtspr(SPRN_TCR, (mfspr(SPRN_TCR) & ~WATCHDOG_MASK) |
+	   	   TCR_WP(CONFIG_WATCHDOG_PRESC) | TCR_WRC(CONFIG_WATCHDOG_RC));
+	} else {
+		stop_85xx_watchdog();
+	}
+}
+
 void
 reset_85xx_watchdog(void)
 {

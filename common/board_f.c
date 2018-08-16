@@ -119,7 +119,20 @@ void blue_led_off(void) __attribute__((weak, alias("__blue_led_off")));
 #if defined(CONFIG_WATCHDOG)
 static int init_func_watchdog_init(void)
 {
+#if defined(CONFIG_MPC85xx)
+	init_85xx_watchdog();
+#endif
 	puts("       Watchdog enabled\n");
+	WATCHDOG_RESET();
+
+	return 0;
+}
+
+int init_watchdog_kernel(void)
+{
+#if defined(CONFIG_MPC85xx)
+	init_85xx_watchdog_kernel();
+#endif
 	WATCHDOG_RESET();
 
 	return 0;

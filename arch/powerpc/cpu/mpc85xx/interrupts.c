@@ -42,7 +42,11 @@ int interrupt_init_cpu(unsigned int *decrementer_count)
 	*decrementer_count = get_tbclk() / CONFIG_SYS_HZ;
 
 	/* PIE is same as DIE, dec interrupt enable */
+#if 1
+	mtspr(SPRN_TCR, mfspr(SPRN_TCR) | TCR_PIE);
+#else
 	mtspr(SPRN_TCR, TCR_PIE);
+#endif
 
 #ifdef CONFIG_INTERRUPTS
 	pic->iivpr1 = 0x810001;	/* 50220 enable ecm interrupts */

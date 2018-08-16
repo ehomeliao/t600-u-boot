@@ -26,6 +26,11 @@
 #define CONFIG_T600
 #define CONFIG_CDEC_CPLD
 
+
+#define CONFIG_WATCHDOG             /* enable CPU watchdog */
+#define CONFIG_WATCHDOG_PRESC 28    /* wdog prescaler, about 12 sec  */
+#define CONFIG_WATCHDOG_RC WRC_CHIP/* reset chip on watchdog event */
+
 #define CONFIG_POST	CONFIG_SYS_POST_MEMORY   /* test POST memory test */
 #define CONFIG_BOOTCOUNT_LIMIT
 #define CONFIG_BOOTCOUNT_ENV
@@ -853,7 +858,8 @@ unsigned long get_board_ddr_clk(void);
 	"upgrade_available=0\0" \
 	"altbootcmd=if test ${bank} = 1; then run boot2; elif test ${bank} = 2; then run boot1; " \
 	"elif test ${bank} = 3; then run usbboot; else run diagboot; fi; "	\
-	"bootm $loadaddr $ramdiskaddr $fdtaddr;\0"
+	"bootm $loadaddr $ramdiskaddr $fdtaddr;\0" \
+	"wdt_enable=1\0"
 
 /*
  * For emulation this causes u-boot to jump to the start of the
