@@ -40,6 +40,13 @@
 #define CONFIG_SPI_FLASH
 #define CONFIG_USB_EHCI
 #define CONFIG_FSL_SATA_V2
+#define CONFIG_CMD_SPI
+#define CONFIG_CMD_GREPENV
+#define CONFIG_CMD_CACHE
+#define CONFIG_CMD_HASH
+#define CONFIG_CMD_SHA1SUM
+#define CONFIG_SHA256
+#define CONFIG_CMD_IRQ
 
 /* High Level Configuration Options */
 #define CONFIG_PHYS_64BIT
@@ -698,6 +705,7 @@ unsigned long get_board_ddr_clk(void);
 #define CONFIG_INIT_SATA
 #define CONFIG_DOS_PARTITION
 #define CONFIG_CMD_EXT2
+#define CONFIG_CMD_EXT4
 #define CONFIG_CMD_FAT
 #endif
 
