@@ -217,7 +217,7 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 #endif
 
 	bank = getenv_ulong("bank", 16, 0x1);
-	fpga_usb = getenv_ulong("fpga_usb", 16, 0x1);
+	fpga_usb = getenv_ulong("fpga_usb", 16, 0);
 	if (fpga_usb == 1) {
 		usb_stop();
 		printf("(Re)start USB...\n");
