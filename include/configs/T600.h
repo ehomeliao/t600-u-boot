@@ -868,7 +868,20 @@ unsigned long get_board_ddr_clk(void);
 	"altbootcmd=if test ${bank} = 1; then run boot2; elif test ${bank} = 2; then run boot1; " \
 	"elif test ${bank} = 3; then run usbboot; else run diagboot; fi; "	\
 	"bootm $loadaddr $ramdiskaddr $fdtaddr;\0" \
-	"wdt_enable=1\0"
+	"wdt_enable=1\0" \
+	"eth1addr=00:e0:0c:00:7a:01\0" \
+	"eth2addr=00:e0:0c:00:7a:02\0" \
+	"eth3addr=00:e0:0c:00:7a:03\0" \
+	"eth4addr=00:e0:0c:00:7a:04\0" \
+	"eth5addr=00:e0:0c:00:7a:05\0" \
+	"eth6addr=00:e0:0c:00:7a:06\0" \
+	"eth7addr=00:e0:0c:00:7a:07\0" \
+	"eth8addr=00:e0:0c:00:7a:08\0" \
+	"eth9addr=00:e0:0c:00:7a:09\0" \
+	"ethact=FM1@DTSEC3\0" \
+	"ethaddr=00:e0:0c:00:7a:10\0" \
+	"ethprime=FM1@DTSEC3\0"
+
 
 /*
  * For emulation this causes u-boot to jump to the start of the
