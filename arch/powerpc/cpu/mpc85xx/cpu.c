@@ -311,6 +311,8 @@ __weak unsigned long get_tbclk (void)
 
 #if defined(CONFIG_WATCHDOG)
 
+static int wdt_polling_stop = 0;
+
 #define WATCHDOG_MASK (TCR_WP(1) | TCR_WRC(3) | TCR_WIE)
 
 void
@@ -342,6 +344,9 @@ init_85xx_watchdog_kernel(void)
 		/* timeout: about 100~120 sec */
 		mtspr(SPRN_TCR, (mfspr(SPRN_TCR) & ~WATCHDOG_MASK) |
 		      TCR_WP(31) | TCR_WRC(CONFIG_WATCHDOG_RC));
+
+		/* Stop WDT polling so that WDT will be triggered after loading kernel fail */
+		wdt_polling_stop = 1;
 	} else {
 		stop_85xx_watchdog();
 	}
@@ -377,7 +382,9 @@ watchdog_reset(void)
 {
 	int re_enable = disable_interrupts();
 
-	reset_85xx_watchdog();
+	if (!wdt_polling_stop) {
+		reset_85xx_watchdog();
+	}
 	if (re_enable)
 		enable_interrupts();
 }
