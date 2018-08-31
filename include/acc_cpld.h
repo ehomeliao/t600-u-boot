@@ -18,7 +18,6 @@
 #define BCM5389_SPI_CS			( 1 << 1)
 
 #define REG_SYS_BOOTUP_STATUS2	0x25
-#define COLD_BOOT_RECORD		( 1 << 0)
 #define WARM_BOOT_RECORD		( 1 << 1)
 
 #define REG_SYS_STATUS2	0x27
@@ -31,6 +30,5 @@ int nor_flash_wp(int enable);
 int is_from_warm_boot(void);
 int mbcnt_loaded(int load);
 int is_mbcnt_loaded(void);
-void t600_print_boot_reason(void);
 
 #endif /* __ACC_CPLD_H__ */

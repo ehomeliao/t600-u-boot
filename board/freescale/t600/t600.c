@@ -33,7 +33,6 @@ int checkboard(void)
 	static const char *freq[3] = {"100.00MHZ", "125.00MHz", "156.25MHZ"};
 
 	printf("Board: T600\n");
-	t600_print_boot_reason();
 	puts("SERDES Reference Clocks:\n");
 	printf("SD1_CLK1=%s, SD1_CLK2=%s\n", freq[2], freq[0]);
 	printf("SD2_CLK1=%s, SD2_CLK2=%s\n", freq[0], freq[0]);
