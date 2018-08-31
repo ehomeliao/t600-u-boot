@@ -109,6 +109,23 @@ int is_from_warm_boot(void)
 	return ret;
 }
 
+void t600_print_boot_reason(void)
+{
+	uint8_t status;
+
+	if (acc_cpld_read(REG_SYS_BOOTUP_STATUS2, &status) == 0) {
+		if (status & COLD_BOOT_RECORD) {
+			printf("BOOT Reason: COLD\n");
+		} else if ( status & WARM_BOOT_RECORD) {
+			printf("BOOT Reason: WARM\n");
+		} else {
+			printf("BOOT Reason: POWER CYCLE\n");
+		}
+	} else {
+		/* Should not happen */
+		printf("BOOT Reason: UNKNOW\n");
+	}
+}
 
 int mbcnt_loaded(int load)
 {
