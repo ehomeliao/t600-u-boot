@@ -22,7 +22,7 @@
 #include <acc_cpld.h>
 #include "t600.h"
 #ifdef CONFIG_CDEC_CPLD
-#include "cdec_cpld.h"
+#include <cdec_cpld.h>
 #endif
 
 DECLARE_GLOBAL_DATA_PTR;

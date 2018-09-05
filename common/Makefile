@@ -270,6 +270,7 @@ ifdef CONFIG_T600
 obj-y += cmd_inventory.o
 obj-y += cmd_norprotect.o
 obj-y += cmd_romver.o
+obj-y += cmd_fpga_conf.o
 endif
 
 CFLAGS_env_embedded.o := -Wa,--no-warn -DENV_CRC=$(shell tools/envcrc 2>/dev/null)
