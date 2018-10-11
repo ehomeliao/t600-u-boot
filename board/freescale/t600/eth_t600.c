@@ -24,6 +24,7 @@
 #include <asm/fsl_dtsec.h>
 #include <asm/fsl_serdes.h>
 #include <i2c.h>
+#include <acc_cpld.h>
 
 int board_eth_init(bd_t *bis)
 {
@@ -32,16 +33,25 @@ int board_eth_init(bd_t *bis)
 	ccsr_gpio_t *gpio3 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x2000);
 
 	/* Set CPLD to select BCM5389 as CPU mode  */
+#if 0
 	i2c_set_bus_num(0);
 	mode = 0x3;
 	i2c_write(0x60, 0x15, 1, &mode, 1);
+#else
+	setup_bcm5389();
+#endif
 
+	/* R0A: BCM5390 reset is controlled by GPIO */
 	/* Set GPIO3_3 as 1 to release BCM5389 reset */
 	dir |= (in_be32(&gpio3->gpdir) & 0xefffffff);
 	val |= (in_be32(&gpio3->gpdat) & 0xefffffff);
 	out_be32(&gpio3->gpdat, val);
 	out_be32(&gpio3->gpdir, dir);
 
+	/* R0B or later: BCM5390 reset is controlled by Accton CDEC */
+	bcm5389_reset(1);
+	udelay(100000);
+	bcm5389_reset(0);
 
 #if defined(CONFIG_FMAN_ENET)
 	int i, interface;

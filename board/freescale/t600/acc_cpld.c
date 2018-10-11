@@ -44,6 +44,19 @@ static int acc_cold_write_mask(uint8_t offset, uint8_t mask, uint8_t value)
 	return ret;
 }
 
+int get_acc_cpu_board_version(uint8_t *version)
+{
+	int ret = -1;
+
+	if (acc_cpld_read(REG_CPU_BOARD_VERSION, version) == 0) {
+		*version = (*version & CPU_BOARD_REV_MASK);
+		ret = 0;
+	}
+
+	return ret;
+
+}
+
 int get_acc_cpld_version(uint8_t *version)
 {
 	int ret = -1;
@@ -57,6 +70,31 @@ int get_acc_cpld_version(uint8_t *version)
 
 }
 
+int fj_cdec_pcie_reset(int reset)
+{
+	int ret = -1;
+
+	if (reset == 0) {
+		ret = acc_cold_write_mask(REG_RESET_CONTROL3, FJ_CDEC_PCIE_RESET, FJ_CDEC_PCIE_RESET);
+	} else {
+		ret = acc_cold_write_mask(REG_RESET_CONTROL3, FJ_CDEC_PCIE_RESET, 0);
+	}
+
+	return ret;
+}
+
+int bcm5389_reset(int reset)
+{
+	int ret = -1;
+
+	if (reset == 0) {
+		ret = acc_cold_write_mask(REG_MGMT_RESET, BCM5389_RESET, BCM5389_RESET);
+	} else {
+		ret = acc_cold_write_mask(REG_MGMT_RESET, BCM5389_RESET, 0);
+	}
+
+	return ret;
+}
 
 int setup_bcm5389(void)
 {
