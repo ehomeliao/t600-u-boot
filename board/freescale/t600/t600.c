@@ -29,13 +29,10 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int checkboard(void)
 {
-	struct cpu_type *cpu = gd->arch.cpu;
-	static const char *freq[3] = {"100.00MHZ", "125.00MHz", "156.25MHZ"};
-
-	printf("Board: T600\n");
+	puts("Board: T600\n");
 	puts("SERDES Reference Clocks:\n");
-	printf("SD1_CLK1=%s, SD1_CLK2=%s\n", freq[2], freq[0]);
-	printf("SD2_CLK1=%s, SD2_CLK2=%s\n", freq[0], freq[0]);
+	puts("SD1_CLK1=156.25MHZ, SD1_CLK2=100.00MHZ\n");
+	puts("SD2_CLK1=100.00MHZ, SD2_CLK2=100.00MHZ\n");
 
 	return 0;
 }
@@ -144,7 +141,6 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 	int ret;
 	unsigned int bank = 1;
 	unsigned int fpga_usb = 0;
-	int len;
 	char *mbcntdir = getenv("mbcntdir");
 #if 0
 	unsigned int act_bank = 0;
@@ -232,7 +228,7 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 				return RET_ERROR;
 			}
 			if (mbcntdir != NULL) {
-				len = snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
+				snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
 			} else {
 				strcpy(dirname, filename);
 			}
@@ -246,7 +242,7 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 			return RET_ERROR;
 		}
 		if (mbcntdir != NULL) {
-			len = snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
+			snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
 		} else {
 			strcpy(dirname, filename);
 		}
@@ -257,7 +253,7 @@ static int bord_fpga_config_sub_v2(const char *filename, unsigned int fpga_confi
 			return RET_ERROR;
 		}
 		if (mbcntdir != NULL) {
-			len = snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
+			snprintf(dirname, 256, "/%s/%s", mbcntdir, filename);
 		} else {
 			strcpy(dirname, filename);
 		}
