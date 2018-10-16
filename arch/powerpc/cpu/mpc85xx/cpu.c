@@ -667,9 +667,12 @@ int arch_memory_test_prepare(u32 *vstart, u32 *size, phys_addr_t *phys_offset)
 				" without proper 36BIT support.\n");
 		}
 #endif
+/* Don't print for T600 which use DDR_DDR_MTCR to test whole 8G DDR */
+#if !defined(CONFIG_T600)
 	printf("Testing 0x%08llx - 0x%08llx\n",
 		(u64)(*vstart) + (*phys_offset),
 		(u64)(*vstart) + (*phys_offset) + (*size) - 1);
+#endif
 
 	return 0;
 }

@@ -912,16 +912,22 @@ int memory_post_test(int flags)
 	int ret = 0;
 	phys_addr_t phys_offset = 0;
 	u32 memsize, vstart;
+	ulong wdt_enable;
 
 	arch_memory_test_prepare(&vstart, &memsize, &phys_offset);
 	
 #if defined(CONFIG_T600)
+	wdt_enable = getenv_ulong("wdt_enable", 16, 0);
+
+	/* Don't DO DDR test if user turn off WDT */
+	if (wdt_enable ) {
 	ret = memory_hwtest(TEST_PTN_RAN1,TST_START,MEMCLR_OFF);
 	if (0 == ret) {
 		ret = memory_hwtest(TEST_PTN_RAN2,TST_NOW,MEMCLR_OFF);
 		if (0 == ret) {
 			ret = memory_hwtest(TEST_PTN_ALLF,TST_END,MEMCLR_ON);
 		}
+	}
 	}
 	
 #else
