@@ -13,6 +13,7 @@
 #include <fsl_ddr_sdram.h>
 #include <fsl_ddr_dimm_params.h>
 #include <asm/fsl_law.h>
+#include <acc_cpld.h>
 #include "ddr.h"
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -23,6 +24,7 @@ void fsl_ddr_board_options(memctl_options_t *popts,
 {
 	const struct board_specific_parameters *pbsp, *pbsp_highest = NULL;
 	ulong ddr_freq;
+	uint8_t version = 0;
 
 	if (ctrl_num > 1) {
 		printf("Not supported controller number %d\n", ctrl_num);
@@ -31,7 +33,15 @@ void fsl_ddr_board_options(memctl_options_t *popts,
 	if (!pdimm->n_ranks)
 		return;
 
-	pbsp = udimms[0];
+	if ((get_acc_cpu_board_version(&version) == 0) && (version != 0)) {
+		/* R0B or later  */
+		printf("Setup DDR for R0B or later...\n");
+		pbsp = udimms[1];
+	} else {
+		/* R0A */
+		printf("Setup DDR for R0A...\n");
+		pbsp = udimms[0];
+	}
 
 	/* Get clk_adjust, wrlvl_start, wrlvl_ctl, according to the board ddr
 	 * freqency and n_banks specified in board_specific_parameters table.

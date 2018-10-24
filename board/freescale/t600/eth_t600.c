@@ -29,7 +29,7 @@
 int board_eth_init(bd_t *bis)
 {
 	unsigned int dir = 0x30000000, val =0x30000000;
-   uint8_t mode;
+//   uint8_t mode;
 	ccsr_gpio_t *gpio3 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x2000);
 
 	/* Set CPLD to select BCM5389 as CPU mode  */
