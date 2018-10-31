@@ -13,6 +13,9 @@
 #ifdef CONFIG_FSL_DEEP_SLEEP
 #include <fsl_sleep.h>
 #endif
+#if defined(CONFIG_T600)
+#include <acc_cpld.h>
+#endif
 
 #if (CONFIG_CHIP_SELECTS_PER_CTRL > 4)
 #error Invalid setting for CONFIG_CHIP_SELECTS_PER_CTRL
@@ -49,6 +52,15 @@ void fsl_ddr_set_memctl_regs(const fsl_ddr_cfg_regs_t *regs,
 	ulong ddr_freq;
 	u32 tmp;
 #endif
+#if defined(CONFIG_T600)
+	uint8_t version = 0;
+	int not_r0a = 0;
+
+	if ((get_acc_cpu_board_version(&version) == 0) && (version != 0)) {
+		not_r0a = 1;
+	}
+#endif
+
 	switch (ctrl_num) {
 	case 0:
 		ddr = (void *)CONFIG_SYS_FSL_DDR_ADDR;
@@ -132,8 +144,18 @@ void fsl_ddr_set_memctl_regs(const fsl_ddr_cfg_regs_t *regs,
 	else
 #endif
 		out_be32(&ddr->sdram_cfg_2, regs->ddr_sdram_cfg_2);
+#if defined(CONFIG_T600)
+	if (not_r0a == 1)
+		out_be32(&ddr->sdram_mode, 0x00061c70);
+	else
+#endif
 	out_be32(&ddr->sdram_mode, regs->ddr_sdram_mode);
 	out_be32(&ddr->sdram_mode_2, regs->ddr_sdram_mode_2);
+#if defined(CONFIG_T600)
+	if (not_r0a == 1)
+		out_be32(&ddr->sdram_mode_3, 0x00061c70);
+	else
+#endif
 	out_be32(&ddr->sdram_mode_3, regs->ddr_sdram_mode_3);
 	out_be32(&ddr->sdram_mode_4, regs->ddr_sdram_mode_4);
 	out_be32(&ddr->sdram_mode_5, regs->ddr_sdram_mode_5);

@@ -25,6 +25,7 @@ void fsl_ddr_board_options(memctl_options_t *popts,
 	const struct board_specific_parameters *pbsp, *pbsp_highest = NULL;
 	ulong ddr_freq;
 	uint8_t version = 0;
+	int is_r0a = 1;
 
 	if (ctrl_num > 1) {
 		printf("Not supported controller number %d\n", ctrl_num);
@@ -37,6 +38,7 @@ void fsl_ddr_board_options(memctl_options_t *popts,
 		/* R0B or later  */
 		printf("Setup DDR for R0B or later...\n");
 		pbsp = udimms[1];
+		is_r0a = 0;
 	} else {
 		/* R0A */
 		printf("Setup DDR for R0A...\n");
@@ -102,8 +104,13 @@ found:
 	popts->zq_en = 1;
 
 	/* DHC_EN =1, ODT = 75 Ohm */
-	popts->ddr_cdr1 = DDR_CDR1_DHC_EN | DDR_CDR1_ODT(DDR_CDR_ODT_75ohm);
-	popts->ddr_cdr2 = DDR_CDR2_ODT(DDR_CDR_ODT_75ohm);
+	if (is_r0a == 1) {
+		popts->ddr_cdr1 = DDR_CDR1_DHC_EN | DDR_CDR1_ODT(DDR_CDR_ODT_75ohm);
+		popts->ddr_cdr2 = DDR_CDR2_ODT(DDR_CDR_ODT_75ohm);
+	} else {
+		popts->ddr_cdr1 = DDR_CDR1_DHC_EN | DDR_CDR1_ODT(DDR_CDR_ODT_60ohm);
+		popts->ddr_cdr2 = DDR_CDR2_ODT(DDR_CDR_ODT_60ohm);
+	}
 }
 
 phys_size_t initdram(int board_type)
